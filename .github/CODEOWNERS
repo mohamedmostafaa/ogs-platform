@@ -1,0 +1,75 @@
+# OGS Platform — code owners.
+# Per AGENTS.md §1 ownership table. Reviewers required automatically by GitHub on PRs touching these paths.
+
+# Default fallback: Engineering Lead + Code Reviewer.
+*                                  @engineering-lead @code-reviewer
+
+# Blueprint and team docs
+AGENTS.md                          @engineering-lead @code-reviewer @architecture-reviewer
+TASKS.md                           @task-curator @engineering-lead
+docs/blueprint/**                  @architecture-reviewer @engineering-lead
+docs/adr/**                        @architecture-reviewer
+docs/runbooks/**                   @docs-writer @engineering-lead
+
+# Database
+packages/db/**                     @database-engineer @architecture-reviewer @security-engineer @code-reviewer
+
+# Auth
+packages/auth/**                   @auth-engineer @security-engineer @code-reviewer
+apps/web-id/**                     @auth-engineer @security-engineer @code-reviewer
+
+# API
+packages/api/**                    @api-engineer @database-engineer @code-reviewer
+
+# UI
+packages/ui/**                     @ui-engineer @code-reviewer
+
+# Frontend feature modules
+apps/web-careers/**                @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/web-skillpass/**              @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/web-academy/**                @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/web-eco/**                    @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/web-enterprise/**             @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/web-corporate/**              @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/web-admin/**                  @frontend-feature-engineer @engineering-lead @code-reviewer
+
+# Live video
+packages/live-video/**             @live-video-engineer @security-engineer @code-reviewer
+
+# AI
+packages/ai/**                     @ai-engineer @architecture-reviewer @code-reviewer
+packages/ai-evals/**               @ai-engineer @code-reviewer
+
+# Inngest + Workflow editor
+packages/inngest/**                @inngest-engineer @code-reviewer
+packages/inngest-functions/**      @inngest-engineer @code-reviewer
+packages/workflows/**              @inngest-engineer @code-reviewer
+packages/workflow-editor/**        @inngest-engineer @ui-engineer @code-reviewer
+
+# Payments
+packages/payments/**               @payments-engineer @security-engineer @code-reviewer
+
+# Notifications + email
+packages/notifications/**          @notifications-engineer @code-reviewer
+packages/email/**                  @notifications-engineer @code-reviewer
+
+# Files + VOD
+packages/files/**                  @files-vod-engineer @security-engineer @code-reviewer
+packages/video/**                  @files-vod-engineer @code-reviewer
+
+# Security
+packages/security/**               @security-engineer @architecture-reviewer @code-reviewer
+
+# i18n
+packages/i18n/**                   @i18n-engineer @ui-engineer @code-reviewer
+apps/*/messages/**                 @i18n-engineer @code-reviewer
+
+# DevOps + CI
+.github/**                         @devops-engineer @engineering-lead @code-reviewer
+turbo.json                         @devops-engineer @code-reviewer
+mprocs.yaml                        @devops-engineer @code-reviewer
+.env.example                       @devops-engineer @security-engineer @code-reviewer
+pnpm-workspace.yaml                @devops-engineer @code-reviewer
+
+# Tests
+tests/**                           @qa-engineer @code-reviewer

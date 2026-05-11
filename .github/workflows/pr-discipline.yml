@@ -1,0 +1,70 @@
+name: pr-discipline
+
+# Enforces the OGS pull-request rules from AGENTS.md.
+# Runs on every PR. Cannot be skipped.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  verify-tasks-update:
+    name: TASKS.md must change when apps/** or packages/** change
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Check that TASKS.md changed when production code changed
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          CHANGED=$(git diff --name-only "$BASE" "$HEAD")
+          echo "Changed files:"
+          echo "$CHANGED"
+          touches_code=$(echo "$CHANGED" | grep -E '^(apps|packages)/' || true)
+          touches_tasks=$(echo "$CHANGED" | grep -E '^TASKS\.md$' || true)
+          if [ -n "$touches_code" ] && [ -z "$touches_tasks" ]; then
+            echo "::error::This PR changes apps/** or packages/** but does not update TASKS.md. Update TASKS.md to mark the task you closed."
+            exit 1
+          fi
+
+  verify-pr-body:
+    name: PR body must list linked tasks and skills invoked
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ -z "$PR_BODY" ]; then
+            echo "::error::PR body is empty."
+            exit 1
+          fi
+          # Linked tasks section requires at least one OGS-NNN
+          if ! echo "$PR_BODY" | grep -E -q 'OGS-[0-9]+'; then
+            echo "::error::PR body must list at least one linked task in the form OGS-NNN."
+            exit 1
+          fi
+          # Skills invoked section
+          if ! echo "$PR_BODY" | grep -E -q '^## Skills invoked'; then
+            echo "::error::PR body must include a '## Skills invoked' section listing every superpowers:* skill invoked."
+            exit 1
+          fi
+          # At least one superpowers: line
+          if ! echo "$PR_BODY" | grep -E -q 'superpowers:'; then
+            echo "::error::PR body lists no invoked skills. At minimum, superpowers:using-superpowers must be listed."
+            exit 1
+          fi
+          # Blueprint references
+          if ! echo "$PR_BODY" | grep -E -q '§[0-9]+(\.[0-9]+)*'; then
+            echo "::error::PR body must reference at least one blueprint section, e.g. §6.2."
+            exit 1
+          fi
+
+  verify-no-self-merge:
+    name: No self-merge — the author cannot be the only approver
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inform
+        run: |
+          echo "Self-merge protection is enforced by GitHub branch protection (require pull request reviews, dismiss stale reviews, require review from Code Owners). This job is a placeholder to remind agents of the rule."

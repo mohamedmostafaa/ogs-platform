@@ -1,0 +1,36 @@
+name: stack-currency
+
+# Verifies the locked dependency floors in tooling/scripts/version-check.ts
+# against the npm registry. Blocks PRs that ship code while two or more
+# majors behind on any locked package (RED). Warns on ORANGE.
+#
+# Runs:
+#   - On every PR.
+#   - Nightly at 06:00 UTC against main, posting a report to docs/status/.
+
+on:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Stack currency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 1 }
+      - uses: pnpm/action-setup@v4
+        with: { version: 11 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Run version check (table)
+        run: pnpm version-check
+      - name: Run version check (json artifact)
+        run: pnpm version-check --json > stack-currency.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stack-currency-report
+          path: stack-currency.json

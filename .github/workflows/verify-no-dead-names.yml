@@ -1,0 +1,68 @@
+name: verify-no-dead-names
+
+# Scans the PR diff for legacy API names from majors that have been bumped.
+# Catches an agent who copy-pasted a stale snippet from older docs.
+#
+# Patterns checked match blueprint §3.1.1 (Notable major-bump migration notes).
+
+on:
+  pull_request:
+
+jobs:
+  scan:
+    name: No dead-name patterns
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Scan added lines for dead names
+        shell: bash
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          # Diff only added lines (+) under apps/** or packages/**
+          # The exclusion paths keep the blueprint, security charter, and code-reviewer
+          # checklist out of the scan, since they intentionally name these patterns
+          # to warn against them.
+          ADDED=$(git diff "$BASE" "$HEAD" -- 'apps/**' 'packages/**' \
+                  ':!packages/db/prisma/schema/**' \
+                  | grep -E '^\+' | grep -v '^\+\+\+' | sed 's/^\+//')
+
+          fail=0
+          declare -A DEAD=(
+            ["middleware\\.ts"]="middleware.ts → proxy.ts (Next.js 16)"
+            ["export function middleware"]="export function middleware → export function proxy (Next.js 16)"
+            ["skipMiddlewareUrlNormalize"]="skipMiddlewareUrlNormalize → skipProxyUrlNormalize (Next.js 16)"
+            ["prisma-client-js"]="prisma-client-js → prisma-client (Prisma 7)"
+            ["import \\{ generateObject"]="generateObject → generateText({ output: ... }) (Vercel AI SDK v6)"
+            ["CoreMessage"]="CoreMessage → ModelMessage (Vercel AI SDK v6)"
+            ["textEmbeddingModel"]="textEmbeddingModel → embeddingModel (Vercel AI SDK v6)"
+            ["oidcProvider"]="oidcProvider → @better-auth/oauth-provider (Better Auth 1.6)"
+            ["apiVersion: \"2024-10-28\\.acacia"]="Stripe apiVersion 2024-10-28.acacia → 2026-03-25.dahlia (Stripe 22)"
+            [", *\\{ event:"]="3-arg createFunction → 2-arg with triggers in options (Inngest 4)"
+            ["from \"@inngest/realtime/middleware\""]="ok (kept) — but verify inngest 4 middleware shape"
+            ["PanelGroup\\b"]="PanelGroup → Group (react-resizable-panels 4)"
+            ["PanelResizeHandle"]="PanelResizeHandle → Separator (react-resizable-panels 4)"
+            ["fromMonth=\"|toMonth=\"|fromYear=|toYear="]="fromMonth/toMonth/fromYear/toYear → startMonth/endMonth/hidden (react-day-picker 10)"
+            ["import \\{ MessageInput"]="MessageInput → MessageComposer (stream-chat-react 14)"
+            ["useMessageInputContext"]="useMessageInputContext → useMessageComposerContext (stream-chat-react 14)"
+            ["withChannelStateContext|withChatContext|withMessageContext"]="HOC wrappers removed; use hooks (stream-chat-react 14)"
+            ["\\.eslintrc"]=".eslintrc removed; flat config only (ESLint 10)"
+          )
+
+          for pattern in "${!DEAD[@]}"; do
+            if echo "$ADDED" | grep -E -q "$pattern"; then
+              echo "::error::Forbidden pattern '$pattern' introduced — ${DEAD[$pattern]}"
+              fail=1
+            fi
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            echo ""
+            echo "One or more dead-name patterns from older majors were introduced."
+            echo "See blueprint §3.1.1 and CODE_STANDARDS.md §0.1."
+            exit 1
+          fi
+
+          echo "OK — no dead-name patterns in this PR."

@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build outputs
+.next/
+.turbo/
+dist/
+build/
+out/
+coverage/
+
+# generated Prisma client
+packages/db/src/generated/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# editors
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# sentry
+.sentryclirc
+
+# misc
+*.tsbuildinfo
+.turbo-cache/
