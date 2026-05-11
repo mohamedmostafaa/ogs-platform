@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Husky pre-commit — runs on every commit.
+# Order: lint-staged (eslint --fix + prettier --write on staged files),
+# then a local gitleaks pass if installed (CI runs the authoritative pass).
+#
+# @see CODE_STANDARDS.md §12, SECURITY.md §0 rule 5
+
+pnpm exec lint-staged
+
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --no-banner
+fi

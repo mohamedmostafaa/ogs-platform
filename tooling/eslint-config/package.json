@@ -1,0 +1,19 @@
+{
+  "name": "@ogs/eslint-config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "library.js",
+  "exports": {
+    ".": "./library.js",
+    "./library.js": "./library.js",
+    "./next.js": "./next.js"
+  },
+  "files": ["library.js", "next.js"],
+  "peerDependencies": {
+    "eslint": "^10",
+    "@typescript-eslint/parser": "^8",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "eslint-plugin-import": "^2"
+  }
+}

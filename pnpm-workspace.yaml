@@ -1,0 +1,7 @@
+# pnpm 11 workspaces declaration.
+# pnpm-specific settings (catalog, hoisting, allowBuilds) belong here, NOT in .npmrc.
+# See blueprint §4.7 and pnpm 11 migration notes in §3.1.1.
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "tooling/*"

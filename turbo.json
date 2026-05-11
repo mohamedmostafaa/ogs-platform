@@ -1,0 +1,110 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    ".env",
+    "tsconfig.base.json",
+    "eslint.config.mjs",
+    ".prettierrc",
+    ".nvmrc"
+  ],
+  "globalEnv": ["NODE_ENV"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "//#prisma:generate"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_ID_URL",
+        "OGS_ID_URL",
+        "OGS_OIDC_CLIENT_ID",
+        "OGS_OIDC_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "LINKEDIN_CLIENT_ID",
+        "LINKEDIN_CLIENT_SECRET",
+        "NEXT_PUBLIC_STREAM_KEY",
+        "STREAM_KEY",
+        "STREAM_SECRET",
+        "STREAM_WEBHOOK_SECRET",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+        "LEMON_API_KEY",
+        "LEMON_STORE_ID",
+        "LEMON_VARIANT_DEFAULT",
+        "LEMON_WEBHOOK_SECRET",
+        "POLAR_ACCESS_TOKEN",
+        "POLAR_SERVER",
+        "POLAR_WEBHOOK_SECRET",
+        "PAYMOB_API_KEY",
+        "PAYMOB_INTEGRATION_ID",
+        "PAYMOB_IFRAME_ID",
+        "PAYMOB_HMAC_SECRET",
+        "PAYMENT_DEFAULT_PROVIDER",
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "VOYAGE_API_KEY",
+        "GOOGLE_API_KEY",
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_SECURE",
+        "SMTP_USER",
+        "SMTP_PASS",
+        "SMTP_FROM",
+        "OGS_SUPPORT_FROM",
+        "TWILIO_ACCOUNT_SID",
+        "TWILIO_AUTH_TOKEN",
+        "TWILIO_FROM",
+        "WHATSAPP_BUSINESS_TOKEN",
+        "WHATSAPP_BUSINESS_PHONE_ID",
+        "ENCRYPTION_KEY_ACTIVE_ID",
+        "ENCRYPTION_KEYS",
+        "INNGEST_EVENT_KEY",
+        "INNGEST_SIGNING_KEY",
+        "INNGEST_DEV",
+        "INNGEST_BASE_URL",
+        "BUNNY_STREAM_LIBRARY_ID",
+        "BUNNY_STREAM_API_KEY",
+        "BUNNY_STREAM_CDN_HOSTNAME",
+        "BUNNY_STREAM_TOKEN_KEY",
+        "BUNNY_WEBHOOK_SECRET",
+        "R2_ACCOUNT_ID",
+        "R2_ACCESS_KEY_ID",
+        "R2_SECRET_ACCESS_KEY",
+        "R2_BUCKET",
+        "R2_PUBLIC_CDN",
+        "SENTRY_DSN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT",
+        "SENTRY_AUTH_TOKEN",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "ARCJET_KEY",
+        "WEBHOOK_IP_ALLOWLIST",
+        "VERCEL_URL"
+      ]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "//#prisma:generate": {
+      "inputs": ["packages/db/prisma/**"],
+      "outputs": ["packages/db/src/generated/**"]
+    }
+  }
+}

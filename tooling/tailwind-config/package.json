@@ -1,0 +1,11 @@
+{
+  "name": "@ogs/tailwind-config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "preset.ts",
+  "files": ["preset.ts", "globals.css"],
+  "peerDependencies": {
+    "tailwindcss": "^4.3.0"
+  }
+}

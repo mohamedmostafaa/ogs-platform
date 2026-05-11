@@ -1,0 +1,10 @@
+{
+  "extends": "./base.json",
+  "compilerOptions": {
+    "plugins": [{ "name": "next" }],
+    "noEmit": true,
+    "module": "ESNext",
+    "jsx": "preserve"
+  },
+  "include": ["src", "next-env.d.ts", "next.config.mjs", "proxy.ts"]
+}

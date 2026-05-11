@@ -65,7 +65,7 @@ const LOCKED: readonly Locked[] = [
   { name: "@prisma/adapter-pg",                   floor: "7.8.0",   owner: "@database-engineer"        },
   // Auth
   { name: "better-auth",                          floor: "1.6.10",  owner: "@auth-engineer"            },
-  { name: "@better-auth/oauth-provider",          floor: "0.1.0",   owner: "@auth-engineer"            },
+  { name: "@better-auth/oauth-provider",          floor: "1.6.10",  owner: "@auth-engineer"            },
   // Security
   { name: "@arcjet/next",                         floor: "1.4.0",   owner: "@security-engineer"        },
   { name: "@arcjet/inspect",                      floor: "1.4.0",   owner: "@security-engineer"        },

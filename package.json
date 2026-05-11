@@ -1,0 +1,55 @@
+{
+  "name": "ogs-platform",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "OGS workforce-trust platform monorepo (Careers, SkillPass, Academy, ECO, Enterprise, Corporate, Admin, Identity).",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=11"
+  },
+  "packageManager": "pnpm@11.0.9",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "mprocs",
+    "lint": "turbo lint",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "db:generate": "pnpm --filter @ogs/db prisma:generate",
+    "db:migrate": "pnpm --filter @ogs/db prisma:migrate",
+    "db:studio": "pnpm --filter @ogs/db prisma:studio",
+    "inngest:dev": "inngest-cli dev",
+    "version-check": "tsx tooling/scripts/version-check.ts",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "dotenv-cli": "^10.0.0",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "husky": "^9",
+    "inngest-cli": "^1.19.2",
+    "lint-staged": "^16",
+    "mprocs": "^0.9.2",
+    "prettier": "^3.8.3",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "tsx": "^4.20.6",
+    "turbo": "^2.9.12",
+    "typescript": "^6.0.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}
