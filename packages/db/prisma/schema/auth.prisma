@@ -1,0 +1,153 @@
+// ---------------------------------------------------------------------------
+// auth.prisma — Better Auth + OAuth provider tables.
+//
+// Mirrors the canonical Better Auth 1.6 schema (User, Account, Session,
+// Verification) plus tables the @better-auth/oauth-provider plugin
+// requires (OAuthApplication, OAuthAccessToken, OAuthConsent).
+//
+// Better Auth manages writes to these tables — application code reads
+// only via @ogs/auth helpers.
+//
+// @see Blueprint §5.5, §6.4.
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String?
+  image         String?
+  /// E.164 phone number; null until OTP-verified.
+  phone         String?   @unique
+  phoneVerified Boolean   @default(false)
+  /// Preferred locale; one of @ogs/config LOCALES.
+  locale        String    @default("en")
+  /// Hashed password — null when user signs in via OAuth only.
+  passwordHash  String?
+  /// Soft-delete sentinel.
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts                Account[]
+  sessions                Session[]
+  memberships             Membership[]
+  consents                OAuthConsent[]
+  accessTokens            OAuthAccessToken[]
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  preferences             UserPreference?
+
+  @@index([deletedAt])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  providerId            String
+  accountId             String
+  /// OAuth refresh token (encrypted at rest by the encryption envelope).
+  refreshToken          String?
+  /// OAuth access token (encrypted at rest).
+  accessToken           String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  /// Hashed password — Better Auth's credential-provider table.
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  /// Identifier — email, phone, or OAuth state token.
+  identifier String
+  /// One-time value; for OTP this is the 6-digit code hashed.
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@index([expiresAt])
+}
+
+// ---- @better-auth/oauth-provider tables -----------------------------------
+
+model OAuthApplication {
+  id           String   @id @default(cuid())
+  clientId     String   @unique
+  /// Hashed client secret.
+  clientSecret String
+  name         String
+  redirectUris String[] @default([])
+  scopes       String[] @default([])
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model OAuthAccessToken {
+  id        String   @id @default(cuid())
+  userId    String
+  clientId  String
+  /// Hashed access token (lookup happens on the hash, never the plaintext).
+  tokenHash String   @unique
+  scopes    String[] @default([])
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([expiresAt])
+}
+
+model OAuthConsent {
+  id        String    @id @default(cuid())
+  userId    String
+  clientId  String
+  scopes    String[]  @default([])
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, clientId])
+  @@index([clientId])
+}
+
+model UserPreference {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  /// JSON blob for per-user UI prefs (theme, density, etc.).
+  prefs     Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

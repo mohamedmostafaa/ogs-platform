@@ -1,0 +1,97 @@
+// ---------------------------------------------------------------------------
+// worker.prisma — Worker profile + experience + education + credentials.
+//
+// One User -> at most one Worker (1:0..1). The Worker row holds the
+// professional profile; the User row holds identity + auth state.
+//
+// @see Blueprint §5.7.
+// ---------------------------------------------------------------------------
+
+model Worker {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  /// Professional headline ("Senior Drilling Engineer — 12 yrs offshore").
+  headline         String?
+  /// Long-form bio / about section (Markdown).
+  bio              String?
+  /// Years of total professional experience.
+  yearsExperience  Int       @default(0)
+  /// Current city (free text — geocoded async).
+  locationCity     String?
+  /// ISO 3166-1 alpha-2 country.
+  locationCountry  String?
+  /// "open_to_work" | "passive" | "not_looking".
+  jobSeekingStatus String    @default("passive")
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  experiences  Experience[]
+  educations   Education[]
+  credentials  Credential[]
+  applications JobApplication[]
+  enrollments  Enrollment[]
+
+  @@index([deletedAt])
+  @@index([locationCountry])
+}
+
+model Experience {
+  id          String    @id @default(cuid())
+  workerId    String
+  companyName String
+  title       String
+  startDate   DateTime
+  endDate     DateTime?
+  /// True when this is the current role (endDate null + flag for query speed).
+  isCurrent   Boolean   @default(false)
+  description String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId, deletedAt])
+}
+
+model Education {
+  id          String    @id @default(cuid())
+  workerId    String
+  institution String
+  degree      String
+  field       String?
+  startDate   DateTime?
+  endDate     DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@index([workerId, deletedAt])
+}
+
+model Credential {
+  id             String    @id @default(cuid())
+  workerId       String
+  /// "certificate" | "license" | "training" | "award".
+  type           String
+  name           String
+  issuer         String
+  issuedAt       DateTime
+  expiresAt      DateTime?
+  /// R2 object key for the credential file (PDF/image).
+  fileKey        String?
+  /// SkillPass-verified link, if any.
+  verificationId String?   @unique
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  worker       Worker             @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  verification SkillVerification? @relation(fields: [verificationId], references: [id])
+
+  @@index([workerId, deletedAt])
+  @@index([type])
+}

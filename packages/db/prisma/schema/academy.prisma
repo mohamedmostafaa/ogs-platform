@@ -1,0 +1,94 @@
+// ---------------------------------------------------------------------------
+// academy.prisma — Course + Lesson + Enrollment + LessonProgress.
+//
+// @see Blueprint §5.10.
+// ---------------------------------------------------------------------------
+
+model Course {
+  id             String    @id @default(cuid())
+  tenantId       String
+  title          String
+  slug           String    @unique
+  description    String?
+  /// "draft" | "published" | "archived".
+  status         String    @default("draft")
+  /// Estimated hours to complete (Markdown lessons + videos + assessments).
+  estimatedHours Int       @default(0)
+  /// Cover image (R2 object key).
+  coverKey       String?
+  /// Price in cents; 0 = free.
+  priceCents     Int       @default(0)
+  priceCurrency  String    @default("USD")
+  publishedAt    DateTime?
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  lessons     Lesson[]
+  enrollments Enrollment[]
+
+  @@index([tenantId, status])
+}
+
+model Lesson {
+  id          String    @id @default(cuid())
+  courseId    String
+  /// Display order (1-based).
+  position    Int
+  title       String
+  /// "video" | "article" | "quiz".
+  type        String
+  /// Bunny.net Stream video GUID (when type=video).
+  videoGuid   String?
+  /// Markdown content (when type=article).
+  body        String?
+  /// Estimated duration in minutes.
+  durationMin Int       @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  course   Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@unique([courseId, position])
+  @@index([courseId, deletedAt])
+}
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  tenantId    String
+  workerId    String
+  courseId    String
+  /// "active" | "completed" | "expired" | "refunded".
+  status      String    @default("active")
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  worker   Worker           @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  course   Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@unique([workerId, courseId])
+  @@index([tenantId, status])
+}
+
+model LessonProgress {
+  id              String    @id @default(cuid())
+  enrollmentId    String
+  lessonId        String
+  /// 0-100; 100 = complete.
+  percentComplete Int       @default(0)
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([enrollmentId, lessonId])
+  @@index([lessonId])
+}

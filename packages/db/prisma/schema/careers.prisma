@@ -1,0 +1,61 @@
+// ---------------------------------------------------------------------------
+// careers.prisma — JobPosting + JobApplication.
+//
+// @see Blueprint §5.9.
+// ---------------------------------------------------------------------------
+
+model JobPosting {
+  id              String    @id @default(cuid())
+  tenantId        String
+  companyId       String
+  title           String
+  slug            String    @unique
+  description     String
+  /// "full_time" | "contract" | "rotation" | "temporary".
+  employmentType  String
+  /// Workplace type — "onsite" | "remote" | "hybrid".
+  workplaceType   String    @default("onsite")
+  locationCity    String?
+  locationCountry String?
+  salaryMin       Int?
+  salaryMax       Int?
+  salaryCurrency  String?
+  /// "draft" | "published" | "closed" | "archived".
+  status          String    @default("draft")
+  publishedAt     DateTime?
+  closedAt        DateTime?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications JobApplication[]
+
+  @@index([tenantId, status, publishedAt])
+  @@index([companyId])
+}
+
+model JobApplication {
+  id            String    @id @default(cuid())
+  tenantId      String
+  jobId         String
+  workerId      String
+  /// "submitted" | "screening" | "interview" | "offer" | "rejected" | "withdrawn".
+  status        String    @default("submitted")
+  /// Worker-provided cover note (optional).
+  coverLetter   String?
+  /// CV snapshot at application time (R2 object key).
+  cvSnapshotKey String?
+  appliedAt     DateTime  @default(now())
+  decidedAt     DateTime?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  job    JobPosting @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  worker Worker     @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, workerId])
+  @@index([tenantId, status])
+  @@index([workerId, status])
+}

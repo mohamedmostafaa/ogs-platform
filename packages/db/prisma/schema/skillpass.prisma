@@ -1,0 +1,72 @@
+// ---------------------------------------------------------------------------
+// skillpass.prisma — Skill, SkillVerification, Endorsement.
+//
+// A Skill is the canonical taxonomy entry ("Well control — Level 2").
+// A SkillVerification ties a Worker to a Skill via a verification event
+// (proctored exam, oral viva, employer endorsement). An Endorsement is
+// a weaker peer-vouch.
+//
+// @see Blueprint §5.11.
+// ---------------------------------------------------------------------------
+
+model Skill {
+  id          String    @id @default(cuid())
+  /// Canonical name (e.g. "MWD operations").
+  name        String    @unique
+  /// Discipline group (e.g. "drilling", "completions", "production").
+  discipline  String
+  /// "level_1" | "level_2" | "level_3" — coarse competency tiers.
+  level       String
+  description String?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  verifications SkillVerification[]
+  endorsements  Endorsement[]
+
+  @@index([discipline, level])
+}
+
+model SkillVerification {
+  id          String    @id @default(cuid())
+  tenantId    String
+  /// Worker being verified — denormalised via Credential.workerId in app code.
+  skillId     String
+  /// "exam_proctored" | "viva" | "employer_attested" | "auto_inferred".
+  method      String
+  /// "passed" | "failed" | "pending" | "revoked".
+  result      String
+  /// Score (0-100) when applicable.
+  score       Int?
+  evidenceUrl String?
+  verifiedAt  DateTime?
+  /// Verification expires after this date (e.g. renewal required annually).
+  expiresAt   DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  skill       Skill        @relation(fields: [skillId], references: [id], onDelete: Restrict)
+  credentials Credential[]
+
+  @@index([tenantId, result])
+  @@index([skillId])
+}
+
+model Endorsement {
+  id               String   @id @default(cuid())
+  tenantId         String
+  skillId          String
+  /// Worker being endorsed (denormalised — relation lives on Credential side).
+  endorsedWorkerId String
+  /// User giving the endorsement.
+  endorserUserId   String
+  note             String?
+  createdAt        DateTime @default(now())
+
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([skillId, endorsedWorkerId, endorserUserId])
+  @@index([tenantId])
+}

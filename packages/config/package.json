@@ -1,0 +1,26 @@
+{
+  "name": "@ogs/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OGS shared constants, enums, and feature-flag defaults — zero runtime dependencies.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./pagination": "./src/pagination.ts",
+    "./enums": "./src/enums.ts",
+    "./apps": "./src/apps.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@ogs/eslint-config": "workspace:*",
+    "@ogs/tsconfig": "workspace:*",
+    "@types/node": "^24",
+    "eslint": "^10.3.0",
+    "typescript": "^6.0.3"
+  }
+}

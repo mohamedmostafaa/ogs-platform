@@ -1,0 +1,36 @@
+// ---------------------------------------------------------------------------
+// company.prisma — Company + Enterprise.
+//
+// A Company is a hiring entity (oil-and-gas operator, service company,
+// EPC contractor). An Enterprise is a Company that has signed up for
+// the OGS Enterprise tier — they share the table but the `enterprise`
+// boolean and the `enterprise*` fields gate the premium surfaces.
+//
+// @see Blueprint §5.8.
+// ---------------------------------------------------------------------------
+
+model Company {
+  id                String    @id @default(cuid())
+  tenantId          String
+  name              String
+  slug              String    @unique
+  description       String?
+  websiteUrl        String?
+  logoKey           String?
+  /// "operator" | "service" | "epc" | "consultancy" | "other".
+  segment           String?
+  /// HQ city / country.
+  locationCity      String?
+  locationCountry   String?
+  /// True when the Company has an active Enterprise subscription.
+  isEnterprise      Boolean   @default(false)
+  enterpriseSinceAt DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  jobs JobPosting[]
+
+  @@index([tenantId, deletedAt])
+  @@index([segment])
+}

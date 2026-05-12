@@ -1,0 +1,60 @@
+// ---------------------------------------------------------------------------
+// audit.prisma — AuditLog + WebhookEvent.
+//
+// `AuditLog` is written by the audit Prisma extension on every mutation
+// of an audited table (tenant-scoped writes). Reading is admin-only.
+// `WebhookEvent` is the inbox table for every incoming webhook
+// (Stripe / Bunny / Inngest / etc.) so replays are idempotent.
+//
+// @see Blueprint §5.16, §16.4.
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  tenantId      String
+  /// User performing the action; "system" for backend jobs.
+  actorUserId   String
+  /// "create" | "update" | "delete" | "soft_delete" | "restore" | "auth".
+  action        String
+  /// Prisma model name ("JobPosting", "Worker", "User").
+  entity        String
+  /// Affected row id (same shape as the model's @id — cuid string).
+  entityId      String
+  /// Before snapshot (null for creates).
+  before        Json?
+  /// After snapshot (null for hard deletes).
+  after         Json?
+  /// IP that initiated the request.
+  ipAddress     String?
+  userAgent     String?
+  /// Inngest correlation id when the action was triggered by a job.
+  correlationId String?
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId, entity, entityId, createdAt])
+  @@index([actorUserId, createdAt])
+}
+
+model WebhookEvent {
+  id              String    @id @default(cuid())
+  /// Source provider — "stripe" | "lemon_squeezy" | "polar" | "paymob" |
+  /// "bunny" | "inngest" | "github" | "twilio".
+  provider        String
+  /// Provider event id — the unique key the provider gives us. Drives
+  /// idempotency: a duplicate delivery is dropped.
+  providerEventId String
+  /// Event topic / type ("invoice.paid", "video.ready", ...).
+  type            String
+  /// Raw JSON payload.
+  payload         Json
+  /// Raw signature header used for verification.
+  signature       String?
+  /// "received" | "verified" | "processed" | "failed".
+  status          String    @default("received")
+  processedAt     DateTime?
+  errorMessage    String?
+  receivedAt      DateTime  @default(now())
+
+  @@unique([provider, providerEventId])
+  @@index([provider, status, receivedAt])
+}

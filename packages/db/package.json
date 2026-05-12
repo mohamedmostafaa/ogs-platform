@@ -1,0 +1,42 @@
+{
+  "name": "@ogs/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OGS database layer — Prisma 7 client + driver adapter + multi-tenancy / soft-delete / audit extensions.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./extensions": "./src/extensions/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "prisma:format": "prisma format",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@ogs/config": "workspace:*",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
+    "dotenv": "^17.0.0",
+    "nanoid": "^5.0.7",
+    "pg": "8.13.1"
+  },
+  "devDependencies": {
+    "@ogs/eslint-config": "workspace:*",
+    "@ogs/tsconfig": "workspace:*",
+    "@types/node": "^24",
+    "@types/pg": "^8.11.10",
+    "eslint": "^10.3.0",
+    "prisma": "^7.0.0",
+    "tsx": "^4.20.6",
+    "typescript": "^6.0.3"
+  }
+}

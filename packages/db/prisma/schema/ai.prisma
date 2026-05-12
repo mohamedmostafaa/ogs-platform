@@ -1,0 +1,131 @@
+// ---------------------------------------------------------------------------
+// ai.prisma — AIInteraction, PromptVersion, EvalRun, KnowledgeDocument,
+//             EmbeddingChunk.
+//
+// Captures every LLM call (for cost + audit + eval), every prompt
+// revision (for reproducibility), and the RAG corpus (pgvector
+// embeddings on KnowledgeDocument chunks).
+//
+// @see Blueprint §5.14.
+// ---------------------------------------------------------------------------
+
+model AIInteraction {
+  id              String   @id @default(cuid())
+  tenantId        String
+  /// User that triggered the call (or "system" for backend jobs).
+  userId          String?
+  /// Logical agent name ("careers_summarizer", "academy_tutor", ...).
+  agent           String
+  /// Provider + model ("anthropic:claude-sonnet-4.5", "openai:gpt-4o").
+  model           String
+  /// Optional pointer to the PromptVersion used.
+  promptVersionId String?
+  /// Inngest event id / Stream run id for cross-system correlation.
+  correlationId   String?
+  /// Token counts.
+  inputTokens     Int      @default(0)
+  outputTokens    Int      @default(0)
+  /// Cost in micro-USD (1e-6 USD) to avoid floating point.
+  costMicroUsd    Int      @default(0)
+  /// Wall-clock latency in milliseconds.
+  latencyMs       Int      @default(0)
+  /// "ok" | "error" | "blocked_by_policy".
+  status          String   @default("ok")
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+
+  promptVersion PromptVersion? @relation(fields: [promptVersionId], references: [id])
+
+  @@index([tenantId, agent, createdAt])
+  @@index([userId])
+  @@index([correlationId])
+}
+
+model PromptVersion {
+  id           String    @id @default(cuid())
+  agent        String
+  version      Int
+  /// The full system + user prompt template.
+  template     String
+  /// Free-form notes ("Tightened JSON schema for skill extraction").
+  changeNote   String?
+  /// True once this version has been graded by an EvalRun.
+  evaluated    Boolean   @default(false)
+  /// Whoever published it.
+  authorUserId String?
+  publishedAt  DateTime  @default(now())
+  retiredAt    DateTime?
+
+  interactions AIInteraction[]
+  evalRuns     EvalRun[]
+
+  @@unique([agent, version])
+  @@index([agent, retiredAt])
+}
+
+model EvalRun {
+  id               String    @id @default(cuid())
+  tenantId         String
+  promptVersionId  String
+  /// Number of fixtures the run scored.
+  fixtureCount     Int
+  /// Mean accuracy 0.0-1.0.
+  meanAccuracy     Float
+  /// Mean cost per fixture (micro-USD).
+  meanCostMicroUsd Int
+  /// JSON detail blob ({fixture, score, response, ...}).
+  details          Json
+  startedAt        DateTime
+  finishedAt       DateTime?
+  createdAt        DateTime  @default(now())
+
+  promptVersion PromptVersion @relation(fields: [promptVersionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([promptVersionId])
+}
+
+model KnowledgeDocument {
+  id         String    @id @default(cuid())
+  tenantId   String
+  /// "manual" | "regulation" | "best_practice" | "course_material".
+  category   String
+  title      String
+  /// R2 object key for the source PDF / markdown.
+  sourceKey  String?
+  /// SHA-256 of the source file — drives re-embedding on change.
+  sourceHash String?
+  /// "pending" | "embedding" | "ready" | "failed".
+  status     String    @default("pending")
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  chunks EmbeddingChunk[]
+
+  @@unique([tenantId, sourceHash])
+  @@index([tenantId, status])
+}
+
+model EmbeddingChunk {
+  id             String                      @id @default(cuid())
+  documentId     String
+  /// Display order within the document (1-based).
+  position       Int
+  /// Plain text of the chunk (used for re-embedding + display).
+  text           String
+  /// Voyage Code 3 / OpenAI embedding — 1024 dim (Voyage) or 1536 (OpenAI).
+  /// Stored as Unsupported until @ogs/db migration adds the column manually
+  /// (Prisma 7 doesn't have native vector support yet — pgvector emits via
+  /// raw SQL in the migration; see 0000_init.sql).
+  embedding      Unsupported("vector(1024)")
+  /// "voyage-code-3" | "openai-text-embedding-3-small" — pin the model used.
+  embeddingModel String
+  /// Token count of the chunk.
+  tokenCount     Int                         @default(0)
+  createdAt      DateTime                    @default(now())
+
+  document KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, position])
+}

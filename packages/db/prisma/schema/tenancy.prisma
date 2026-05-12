@@ -1,0 +1,43 @@
+// ---------------------------------------------------------------------------
+// tenancy.prisma — Tenant, Membership.
+//
+// Every row that belongs to a tenant carries `tenantId String`. The
+// tenant-scope Prisma extension (src/extensions/tenant-scope.ts) reads
+// the current tenantId from AsyncLocalStorage and applies it to every
+// query — applications never write a `where: { tenantId }` clause by
+// hand.
+//
+// @see Blueprint §5.6, §16.3.
+// ---------------------------------------------------------------------------
+
+model Tenant {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  /// soft-delete sentinel; null = active
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  memberships Membership[]
+
+  @@index([deletedAt])
+}
+
+model Membership {
+  id        String    @id @default(cuid())
+  tenantId  String
+  userId    String
+  /// Role string; cross-checked against @ogs/config ROLES at runtime.
+  role      String
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+  @@index([tenantId, deletedAt])
+}

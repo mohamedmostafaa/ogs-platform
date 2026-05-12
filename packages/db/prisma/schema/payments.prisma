@@ -1,0 +1,79 @@
+// ---------------------------------------------------------------------------
+// payments.prisma — Customer, Subscription, Payment.
+//
+// Provider-agnostic schema. `provider` discriminates Stripe / Lemon
+// Squeezy / Polar / PayMob — admin can switch providers via FeatureFlag.
+//
+// @see Blueprint §5.12.
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id          String    @id @default(cuid())
+  tenantId    String
+  /// Either a userId (worker subscription) or a companyId (enterprise).
+  ownerType   String
+  ownerId     String
+  /// "stripe" | "lemon_squeezy" | "polar" | "paymob".
+  provider    String
+  /// Provider-side customer id (e.g. "cus_..." for Stripe).
+  providerRef String
+  email       String
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  subscriptions Subscription[]
+  payments      Payment[]
+
+  @@unique([provider, providerRef])
+  @@index([tenantId])
+  @@index([ownerType, ownerId])
+}
+
+model Subscription {
+  id                 String    @id @default(cuid())
+  tenantId           String
+  customerId         String
+  provider           String
+  providerRef        String
+  /// "trialing" | "active" | "past_due" | "canceled" | "unpaid".
+  status             String
+  /// Plan identifier as defined in the admin (e.g. "enterprise_seat_monthly").
+  planCode           String
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean   @default(false)
+  canceledAt         DateTime?
+  deletedAt          DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerRef])
+  @@index([tenantId, status])
+}
+
+model Payment {
+  id          String    @id @default(cuid())
+  tenantId    String
+  customerId  String
+  provider    String
+  providerRef String
+  amountCents Int
+  currency    String
+  /// "pending" | "succeeded" | "failed" | "refunded".
+  status      String
+  /// Free-text description ("Enterprise — 5 seats", "Course — Well control L2").
+  description String?
+  paidAt      DateTime?
+  refundedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerRef])
+  @@index([tenantId, status])
+  @@index([customerId])
+}

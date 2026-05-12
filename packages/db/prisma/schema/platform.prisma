@@ -1,0 +1,38 @@
+// ---------------------------------------------------------------------------
+// platform.prisma — FeatureFlag + AppSettings.
+//
+// FeatureFlag drives gradual rollout + per-tenant overrides; AppSettings
+// is the admin's single row of platform-wide configuration (default
+// payment provider, support email, etc.).
+//
+// @see Blueprint §5.17, §6.8 (requireFeature guard).
+// ---------------------------------------------------------------------------
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  /// Stable flag key — e.g. "careers.video_apply", "academy.ai_tutor".
+  key         String
+  /// Null = global default; non-null = tenant-specific override.
+  tenantId    String?
+  /// True / false / "percentage:25" / "users:[id1,id2]" — string DSL.
+  /// Validated in @ogs/auth/guards.ts:requireFeature().
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([key, tenantId])
+  @@index([key])
+}
+
+model AppSettings {
+  /// Singleton — id is always "default".
+  id              String   @id @default("default")
+  /// Currently-active payment provider (one of the four).
+  paymentProvider String   @default("stripe")
+  /// Public support email shown in footers + receipts.
+  supportEmail    String   @default("support@ogs-tc.com")
+  /// Apex domain (for cross-domain SSO).
+  rootDomain      String   @default("ogs-tc.com")
+  updatedAt       DateTime @updatedAt
+}

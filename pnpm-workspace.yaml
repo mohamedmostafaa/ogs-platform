@@ -10,12 +10,16 @@ packages:
   - "packages/*"
   - "tooling/*"
 onlyBuiltDependencies:
+  - "@prisma/engines"
   - esbuild
   - inngest-cli
+  - prisma
   - sharp
   - unrs-resolver
 allowBuilds:
+  "@prisma/engines": true
   esbuild: true
   inngest-cli: true
+  prisma: true
   sharp: true
   unrs-resolver: true

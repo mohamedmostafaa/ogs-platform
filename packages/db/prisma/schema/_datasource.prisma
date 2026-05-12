@@ -1,0 +1,25 @@
+// ---------------------------------------------------------------------------
+// _datasource.prisma — Prisma 7 generator + datasource declaration.
+//
+// In Prisma 7:
+//   - generator is `prisma-client` (legacy `prisma-client-js` removed).
+//   - `url` / `directUrl` are NO LONGER set in the schema — they move
+//     into `prisma.config.ts` (migrations) and the PrismaClient adapter
+//     constructor (runtime). The schema only declares provider +
+//     extensions.
+//
+// @see Blueprint §5.4, https://pris.ly/d/prisma7-client-config.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../../src/generated/prisma"
+  moduleFormat    = "esm"
+  runtime         = "nodejs"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [pgcrypto, vector]
+}
