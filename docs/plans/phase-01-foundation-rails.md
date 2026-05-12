@@ -276,6 +276,92 @@ OGS-091 says "install the full shadcn primitive set (~50)". We **do not** ship a
 - [ ] `gitleaks detect --exit-code 1` → 0 leaks.
 - [ ] Live `/ui-smoke` still renders; AgentAvatar shows SVG variant by default with visible AI pill at every size.
 
+---
+
+## Atomic steps — OGS-110..111 (app shells consuming `@ogs/ui`)
+
+**Owner:** @ui-engineer (lead — shared `<AppShell>` primitive), @devops-engineer (sibling-app bootstrap)
+**Reviewer:** @code-reviewer + @security-engineer (each app's stub must NOT leak server-only env into the client bundle)
+**Security gates touched:**
+
+- Gate 3 (output minimisation): pages are server components; no server env vars leak through stray `process.env.X` references in the rendered markup.
+- Gate 8 (secrets): each app's bundle must not import @ogs/db, @ogs/auth/server, or any package that loads secrets at module level.
+
+**Blueprint sections:** §29.10 (app shells), §3.5 (theme + brand resolver), §9 (UI surface).
+
+### Prerequisites verified
+
+- `@ogs/ui` exports stabilised (Primitives, Theme, EntityX, Avatar, Hooks).
+- `apps/id` already runs the shell pattern (layout.tsx imports `@ogs/ui/styles/globals.css` + wraps in `OgsThemeProvider`; page.tsx uses `Button` + `ThemeToggle`). The 7 sibling apps copy that pattern but factor the page body through a shared `<AppShell>` primitive so we don't have 7 near-identical files.
+- 7 sibling apps each have a `layout.tsx` + `page.tsx` stub from Phase 0 with no `@ogs/ui` dep yet (verified via `grep "@ogs/ui" apps/*/package.json`).
+
+### Scope decision (loud, in the plan)
+
+OGS-110 is "bootstrap `apps/web-id` shell" — **already done** in the UI follow-ups chunk (OGS-091/095/100..103). This expansion delivers OGS-111 (the remaining 7 apps) **plus** factors the shared shell body into `@ogs/ui` so future copy-edits land in one place. Worker apps (referenced loosely in the macro) are **not** Next.js apps — they're background processes shipped under `apps/workers/*` in Phase 03 — so they are explicitly out of scope here.
+
+### File map
+
+| Path                                                                           | Purpose                                                                      |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `packages/ui/src/app-shell/app-shell.tsx`                                      | New `<AppShell>` server component — header + main slot + footer + theme tog. |
+| `packages/ui/src/app-shell/index.ts`                                           | Public barrel.                                                               |
+| `packages/ui/package.json`                                                     | Add `./app-shell` export.                                                    |
+| `packages/ui/src/index.ts`                                                     | Re-export from `./app-shell`.                                                |
+| `apps/{careers,academy,admin,corporate,skillpass,enterprise,eco}/package.json` | Add `@ogs/ui` workspace dep + `tailwindcss` + `@tailwindcss/postcss`.        |
+| `apps/{...}/postcss.config.mjs`                                                | Same as `apps/id/postcss.config.mjs`.                                        |
+| `apps/{...}/src/app/layout.tsx`                                                | Import globals.css + wrap in `OgsThemeProvider`.                             |
+| `apps/{...}/src/app/page.tsx`                                                  | One-liner `<AppShell title="..." tagline="..." />`.                          |
+
+### OGS-110.01 — DONE (was delivered with UI follow-ups)
+
+Reference only: `apps/id` already renders the themed home page.
+
+### OGS-111.01 — shared `<AppShell>` primitive
+
+- [ ] Create `packages/ui/src/app-shell/app-shell.tsx`. Server component. Props: `{ title: string; tagline: string; signInHref?: string; children?: ReactNode }`. Renders: brand title link, theme toggle (client subcomponent), tagline, optional "Sign in" button linking to `signInHref` (defaults to `https://id.ogs-tc.com/login`), optional children slot below the tagline, plus a small footer (`<phase-stamp>OGS workforce-trust platform — Phase 01 shell.</phase-stamp>` text only — no secrets/env).
+- [ ] Tailwind classes mirror `apps/id/src/app/page.tsx` so the visual identity stays consistent.
+- [ ] Add `packages/ui/src/app-shell/index.ts` re-exporting `AppShell`.
+- [ ] Wire the new export in `packages/ui/package.json` (`./app-shell` → `./src/app-shell/index.ts`).
+- [ ] Re-export from `packages/ui/src/index.ts` for the root barrel.
+
+### OGS-111.02 — Bootstrap 7 sibling apps
+
+For each of `careers, academy, admin, corporate, skillpass, enterprise, eco`:
+
+- [ ] `package.json`: add deps `"@ogs/ui": "workspace:*"`, devDeps `"tailwindcss": "^4.3.0"`, `"@tailwindcss/postcss": "^4.3.0"`.
+- [ ] `postcss.config.mjs`: copy of `apps/id/postcss.config.mjs`.
+- [ ] `src/app/layout.tsx`: replace body with the same pattern as `apps/id/src/app/layout.tsx` minus the `TRPCReactProvider` (no tRPC client wired yet for these apps).
+- [ ] `src/app/page.tsx`: single `<AppShell title="OGS X" tagline="..." />`. One JSX line, no inline styles.
+
+Per-app brand text:
+
+| App        | Port | Title          | Tagline                                                                |
+| ---------- | ---- | -------------- | ---------------------------------------------------------------------- |
+| careers    | 3001 | OGS Careers    | Where verified workers meet hiring companies across the energy sector. |
+| skillpass  | 3002 | OGS SkillPass  | Portable, verifiable credentials for oil-and-gas workers.              |
+| academy    | 3003 | OGS Academy    | Training and certification for the energy workforce.                   |
+| eco        | 3004 | OGS Eco        | Ecosystem hub for partners and developers building on OGS.             |
+| enterprise | 3005 | OGS Enterprise | Enterprise tooling for workforce trust at scale.                       |
+| admin      | 3006 | OGS Admin      | Internal operations console for the OGS platform team.                 |
+| corporate  | 3007 | OGS Corporate  | About OGS — workforce-trust for oil-and-gas.                           |
+
+### Verification gates (must all PASS before commit)
+
+- [ ] `pnpm turbo typecheck` → 30/30 green (8 apps + packages).
+- [ ] `pnpm turbo build` → 8/8 apps green.
+- [ ] `pnpm turbo lint` → all green.
+- [ ] `pnpm format:check` → clean.
+- [ ] `gitleaks detect --exit-code 1` → 0 leaks.
+- [ ] Manual visual sniff: `pnpm --filter=@ogs/careers dev` boots, `localhost:3001` renders the AppShell with working theme toggle.
+
+### Commit body template
+
+```
+feat(apps): app shells consuming @ogs/ui in 7 sibling apps + shared <AppShell> primitive (OGS-111)
+```
+
+(walk 10 SECURITY gates inline; note that all 7 shells are server components with no env imports.)
+
 ## Done
 
 (Move completed tasks here.)
