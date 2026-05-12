@@ -15,6 +15,7 @@ Superseded, or Rejected.
 | [0004](./0004-auth-guard-hardening.md)         | Auth guard hardening — mandatory tenantSlug, prod URL guard, FF DSL scope, signup hook | Accepted |
 | [0005](./0005-phase-a-audit-resolution.md)     | Phase-A audit resolution log — 16 closed, 2 false positives, 0 open                    | Accepted |
 | [0006](./0006-runwithactor-scope.md)           | `runWithActor` moves from request context to `tenantProcedure` middleware              | Accepted |
+| [0007](./0007-agent-avatars-inline-svg.md)     | Agent-avatar artwork ships as inline-SVG React components (abandons OGS-104)           | Accepted |
 
 Add new ADRs by copying `0000-template.md` to `NNNN-<slug>.md` and bumping
 this index in the same PR.

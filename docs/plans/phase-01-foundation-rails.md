@@ -218,6 +218,64 @@ Verified locally: turbo typecheck/build/lint/format:check + version-check
 Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
 ```
 
+## Atomic steps — UI follow-ups (OGS-091 progress, OGS-095, OGS-100..103, OGS-104 disposition)
+
+**Owner:** @ui-engineer · **Reviewer:** @code-reviewer + @security-engineer (AgentAvatar contrast / "AI never mistakable")
+**Security gates touched:** Gate 2 (Form + Zod scaffolding for Phase 02 sign-in), Gate 9 (AI-vs-human visual distinction on every AgentAvatar variant).
+**Blueprint sections:** §3.5.3 (brand resolver), §9.1 (full primitive set), §9.4 (UserAvatar + AgentAvatar — no DiceBear), §9.5 (useErrorModal), §9.6 (useEntitySearch — 500 ms debounce), §10.3 (useConfirm — promise-based).
+
+### Prerequisites verified
+
+- `pnpm version-check` GREEN at start (66 green).
+- Radix + RHF + Sonner versions cross-checked vs `npm view` before pinning.
+
+### Scope decision (loud, in the plan)
+
+OGS-091 says "install the full shadcn primitive set (~50)". We **do not** ship all 50 in this chunk. We ship the **15 highest-value primitives** Phase 02 needs (Identity sign-in/up + onboarding): dialog, alert-dialog, sheet, tabs, select, checkbox, radio-group, switch, tooltip, popover, accordion, progress, toggle, toggle-group, alert, form, sonner. OGS-091 stays `[~]` until the remaining primitives land — but **per-primitive, just-in-time** as Phase 02 imports them. No more "install all 50 at once" inflating bundle size for primitives we never use.
+
+### File map
+
+| Path                                                    | Purpose                                                           |
+| ------------------------------------------------------- | ----------------------------------------------------------------- |
+| `packages/ui/src/primitives/alert.tsx`                  | Alert variants (default + destructive)                            |
+| `packages/ui/src/primitives/alert-dialog.tsx`           | Radix destructive-action confirmation                             |
+| `packages/ui/src/primitives/dialog.tsx`                 | Radix modal                                                       |
+| `packages/ui/src/primitives/sheet.tsx`                  | Radix slide-over                                                  |
+| `packages/ui/src/primitives/tabs.tsx`                   | Radix tabs                                                        |
+| `packages/ui/src/primitives/select.tsx`                 | Radix select with shadcn skin                                     |
+| `packages/ui/src/primitives/checkbox.tsx`               | Radix checkbox                                                    |
+| `packages/ui/src/primitives/radio-group.tsx`            | Radix radio-group                                                 |
+| `packages/ui/src/primitives/switch.tsx`                 | Radix switch                                                      |
+| `packages/ui/src/primitives/tooltip.tsx`                | Radix tooltip + provider                                          |
+| `packages/ui/src/primitives/popover.tsx`                | Radix popover                                                     |
+| `packages/ui/src/primitives/accordion.tsx`              | Radix accordion                                                   |
+| `packages/ui/src/primitives/progress.tsx`               | Radix progress                                                    |
+| `packages/ui/src/primitives/toggle.tsx`                 | Radix toggle button                                               |
+| `packages/ui/src/primitives/toggle-group.tsx`           | Radix toggle-group                                                |
+| `packages/ui/src/primitives/form.tsx`                   | RHF + Zod adapters (Field/Item/Label/Control/Description/Message) |
+| `packages/ui/src/primitives/sonner.tsx`                 | Sonner Toaster + next-themes bridge                               |
+| `packages/ui/src/theme/brand.ts`                        | `resolveBrand(tenantId?)` stub (Phase 02 reads FeatureFlag)       |
+| `packages/ui/src/hooks/use-error-modal.tsx`             | Promise-based error display                                       |
+| `packages/ui/src/hooks/use-entity-search.ts`            | 500 ms debounced search                                           |
+| `packages/ui/src/hooks/use-confirm.tsx`                 | Promise-based confirm dialog                                      |
+| `packages/ui/src/assets/agent-avatars/Avatar01..12.tsx` | 12 inline-SVG components, neutral geometric, no human imagery     |
+| `packages/ui/src/assets/agent-avatars/index.ts`         | `pickAgentAvatar(slug)` stable hash → component                   |
+| `packages/ui/src/avatar/agent-avatar.tsx`               | Add `glyphVariant?: "svg" \| "letter"` prop (default `"svg"`)     |
+
+### OGS-104 disposition
+
+**Not shipped.** Replaced by inline-SVG React components (OGS-100). No `public/` copy needed; each app `import { pickAgentAvatar } from "@ogs/ui/assets/agent-avatars"`. **ADR-0007** records the deviation. OGS-104 marked `[-]` (abandoned) in TASKS.md with forward-reference to the ADR.
+
+### Verification gates (must all PASS before commit)
+
+- [ ] `pnpm version-check` → 66+ green, 0 yellow.
+- [ ] `pnpm turbo typecheck` → all packages green.
+- [ ] `pnpm turbo build` → 8/8 apps green.
+- [ ] `pnpm turbo lint` → all green.
+- [ ] `pnpm format:check` → clean.
+- [ ] `gitleaks detect --exit-code 1` → 0 leaks.
+- [ ] Live `/ui-smoke` still renders; AgentAvatar shows SVG variant by default with visible AI pill at every size.
+
 ## Done
 
 (Move completed tasks here.)
