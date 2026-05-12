@@ -7,3 +7,4 @@
  */
 export { OgsThemeProvider } from "./provider";
 export { ThemeToggle } from "./theme-toggle";
+export { resolveBrand, type BrandTokens } from "./brand";

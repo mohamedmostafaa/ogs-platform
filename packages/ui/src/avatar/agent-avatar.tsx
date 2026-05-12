@@ -1,22 +1,36 @@
 /**
  * `AgentAvatar` — branded avatar for AI agent personas.
  *
- * Renders a colored square with the agent's emoji or first letter,
- * plus a discreet "AI" pill in the corner so users can never mistake
- * an agent reply for a human one (accessibility + safety requirement
- * from blueprint §6 and SECURITY.md §9).
+ * Renders a colored square (tone derived deterministically from the
+ * agent slug) plus a discreet "AI" pill in the corner so users can
+ * never mistake an agent reply for a human one. SECURITY rule "AI
+ * must never be mistakable for a human" — the pill is high-contrast
+ * `bg-primary` regardless of variant.
+ *
+ * Glyph variants:
+ *   - `"svg"` (default): inline-SVG geometric mark selected via
+ *     `pickAgentAvatar(agent)`. No human imagery; same slug always
+ *     yields the same mark.
+ *   - `"letter"`: single-character glyph (`glyph` prop, or first
+ *     letter of `agent`). Useful in dense lists where the SVG would
+ *     blur at sub-16px sizes.
+ *
+ * @see ADR-0007.
  */
 "use client";
 
 import { Sparkles } from "lucide-react";
 import * as React from "react";
 
+import { pickAgentAvatar } from "../assets/agent-avatars";
 import { cn } from "../lib/cn";
 
 export interface AgentAvatarProps {
   /** Agent slug ("careers_summarizer", "academy_tutor", ...). */
   agent: string;
-  /** Optional emoji / single character to render inside the square. */
+  /** Choose SVG mark (default) or single-character letter glyph. */
+  glyphVariant?: "svg" | "letter";
+  /** Optional single-character glyph — only used when `glyphVariant="letter"`. */
   glyph?: string;
   /**
    * Tailwind class controlling the background tint — defaults to a
@@ -41,9 +55,28 @@ const TONE_PALETTE = [
   "bg-rose-500/15 text-rose-700 dark:text-rose-300",
 ];
 
-export function AgentAvatar({ agent, glyph, tone, size = "md", className }: AgentAvatarProps) {
-  const computedTone = tone ?? TONE_PALETTE[stableHash(agent) % TONE_PALETTE.length];
-  const display = glyph ?? agent.charAt(0).toUpperCase();
+/** djb2-ish stable hash for deterministic palette selection. */
+function stableHash(input: string): number {
+  let h = 0;
+  for (let i = 0; i < input.length; i += 1) {
+    h = (h << 5) - h + input.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+export function AgentAvatar({
+  agent,
+  glyphVariant = "svg",
+  glyph,
+  tone,
+  size = "md",
+  className,
+}: AgentAvatarProps) {
+  const computedTone =
+    tone ?? TONE_PALETTE[stableHash(agent) % TONE_PALETTE.length] ?? TONE_PALETTE[0]!;
+  const AvatarMark = pickAgentAvatar(agent);
+
   return (
     <div
       role="img"
@@ -55,14 +88,20 @@ export function AgentAvatar({ agent, glyph, tone, size = "md", className }: Agen
         className,
       )}
     >
-      <span aria-hidden>{display}</span>
+      {glyphVariant === "svg" ? (
+        <span aria-hidden className="h-3/5 w-3/5">
+          <AvatarMark />
+        </span>
+      ) : (
+        <span aria-hidden>{glyph ?? agent.charAt(0).toUpperCase()}</span>
+      )}
       {/*
         AI-agent identifier pill. Per SECURITY.md (rule "AgentAvatar
         must never be mistakable for a human user"), the pill MUST
         have high contrast against the page background — we use
         primary-on-primary-foreground rather than a faint outlined dot.
         The pill is bottom-right at 35% of the avatar's diameter so
-        it's clearly visible at every size.
+        it's clearly visible at every size, regardless of glyphVariant.
       */}
       <span
         aria-hidden
@@ -73,14 +112,4 @@ export function AgentAvatar({ agent, glyph, tone, size = "md", className }: Agen
       </span>
     </div>
   );
-}
-
-/** Tiny non-cryptographic hash for deterministic palette selection. */
-function stableHash(input: string): number {
-  let h = 0;
-  for (let i = 0; i < input.length; i += 1) {
-    h = (h << 5) - h + input.charCodeAt(i);
-    h |= 0;
-  }
-  return Math.abs(h);
 }
