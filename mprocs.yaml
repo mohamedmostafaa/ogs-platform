@@ -1,35 +1,41 @@
 # pnpm dev — single-command bring-up of the entire OGS platform locally.
 # Each app gets a fixed port so cross-domain SSO testing is deterministic.
-# See blueprint §4.9.
+#
+# Inngest devserver, workers, and Prisma Studio are commented out until
+# their packages land in Phase 01 — uncomment as each ships.
+#
+# @see Blueprint §4.9, docs/runbooks/local-dev.md.
 procs:
   id:
-    cwd: apps/web-id
-    cmd: ["pnpm", "dev", "--port", "3000"]
-  careers:
-    cwd: apps/web-careers
-    cmd: ["pnpm", "dev", "--port", "3001"]
-  skillpass:
-    cwd: apps/web-skillpass
-    cmd: ["pnpm", "dev", "--port", "3002"]
-  academy:
-    cwd: apps/web-academy
-    cmd: ["pnpm", "dev", "--port", "3003"]
-  eco:
-    cwd: apps/web-eco
-    cmd: ["pnpm", "dev", "--port", "3004"]
-  enterprise:
-    cwd: apps/web-enterprise
-    cmd: ["pnpm", "dev", "--port", "3005"]
-  admin:
-    cwd: apps/web-admin
-    cmd: ["pnpm", "dev", "--port", "3006"]
-  corporate:
-    cwd: apps/web-corporate
-    cmd: ["pnpm", "dev", "--port", "3007"]
-  workers:
-    cwd: apps/workers
+    cwd: apps/id
     cmd: ["pnpm", "dev"]
-  inngest:
-    cmd: ["pnpm", "inngest:dev"]
-  prisma:
-    cmd: ["pnpm", "db:studio"]
+  careers:
+    cwd: apps/careers
+    cmd: ["pnpm", "dev"]
+  skillpass:
+    cwd: apps/skillpass
+    cmd: ["pnpm", "dev"]
+  academy:
+    cwd: apps/academy
+    cmd: ["pnpm", "dev"]
+  eco:
+    cwd: apps/eco
+    cmd: ["pnpm", "dev"]
+  enterprise:
+    cwd: apps/enterprise
+    cmd: ["pnpm", "dev"]
+  admin:
+    cwd: apps/admin
+    cmd: ["pnpm", "dev"]
+  corporate:
+    cwd: apps/corporate
+    cmd: ["pnpm", "dev"]
+
+  # ---- Re-enable as each package lands ------------------------------------
+  # workers:
+  #   cwd: apps/workers
+  #   cmd: ["pnpm", "dev"]
+  # inngest:
+  #   cmd: ["pnpm", "inngest:dev"]
+  # prisma:
+  #   cmd: ["pnpm", "db:studio"]
