@@ -19,8 +19,8 @@
  *
  * @see Blueprint §16.3.
  */
-import { Prisma } from "../generated/prisma/client.js";
-import { getActor } from "../run-with-actor.js";
+import { Prisma } from "../generated/prisma/client";
+import { getActor } from "../run-with-actor";
 
 /**
  * Models that do NOT have a `tenantId` column. Anything else is

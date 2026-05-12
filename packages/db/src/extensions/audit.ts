@@ -14,8 +14,8 @@
  *
  * @see Blueprint §16.4.
  */
-import { Prisma } from "../generated/prisma/client.js";
-import { getActor } from "../run-with-actor.js";
+import { Prisma } from "../generated/prisma/client";
+import { getActor } from "../run-with-actor";
 
 const NOT_AUDITED = new Set<string>([
   "AuditLog",

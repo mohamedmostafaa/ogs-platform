@@ -9,6 +9,6 @@
  * Reversing this order would, for example, allow a soft-delete to skip
  * the tenantId filter — definitely not what we want.
  */
-export { auditExtension } from "./audit.js";
-export { softDeleteExtension } from "./soft-delete.js";
-export { tenantScopeExtension } from "./tenant-scope.js";
+export { auditExtension } from "./audit";
+export { softDeleteExtension } from "./soft-delete";
+export { tenantScopeExtension } from "./tenant-scope";

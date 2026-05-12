@@ -14,7 +14,7 @@
  *
  * @see Blueprint §16.2.
  */
-import { Prisma } from "../generated/prisma/client.js";
+import { Prisma } from "../generated/prisma/client";
 
 /**
  * Models that do NOT have a `deletedAt` column. Every other model

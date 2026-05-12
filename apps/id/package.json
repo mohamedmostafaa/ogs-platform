@@ -14,9 +14,12 @@
     "next": "16.2.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "@ogs/auth": "workspace:*",
     "@ogs/config": "workspace:*",
+    "@ogs/db": "workspace:*",
     "@ogs/security": "workspace:*",
     "@ogs/ui": "workspace:*",
+    "better-auth": "^1.6.11",
     "lucide-react": "^1.14.0"
   },
   "devDependencies": {

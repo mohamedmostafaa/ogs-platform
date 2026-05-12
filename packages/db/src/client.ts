@@ -13,7 +13,7 @@
  */
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "./generated/prisma/client.js";
+import { PrismaClient } from "./generated/prisma/client";
 
 declare global {
   var __ogsPrismaBase: PrismaClient | undefined;
@@ -26,10 +26,14 @@ function resolveConnectionString(): string {
       : undefined;
   const pooled = process.env.DATABASE_URL;
   const url = direct ?? pooled;
-  if (!url) {
-    throw new Error("[@ogs/db] DATABASE_URL must be set. See docs/runbooks/local-dev.md.");
-  }
-  return url;
+  if (url) return url;
+
+  // Build-time fallback. `next build` evaluates module top-levels
+  // (NODE_ENV=production, NEXT_PHASE=phase-production-build) without
+  // env vars loaded, just to introspect route metadata. Prisma's driver
+  // adapter is lazy — handing it a placeholder URL is safe. Real
+  // requests will set DATABASE_URL via Vercel's runtime env.
+  return "postgresql://build-time-placeholder@localhost:5432/placeholder";
 }
 
 function createClient(): PrismaClient {
@@ -38,13 +42,20 @@ function createClient(): PrismaClient {
 }
 
 /**
- * Singleton, *un-extended* PrismaClient. Use only inside `./index.ts`
- * to compose extensions; application code imports the composed client.
+ * Lazy singleton — the actual `new PrismaClient(...)` call is deferred
+ * until first property access. This prevents `next build` from crashing
+ * during route discovery (which evaluates module top-levels without
+ * env vars loaded). Cached on `globalThis` to survive Next.js HMR.
  */
-export const basePrisma: PrismaClient = globalThis.__ogsPrismaBase ?? createClient();
+export const basePrisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    if (!globalThis.__ogsPrismaBase) {
+      globalThis.__ogsPrismaBase = createClient();
+    }
+    const client = globalThis.__ogsPrismaBase;
+    const value = client[prop as keyof PrismaClient];
+    return typeof value === "function" ? (value as Function).bind(client) : value;
+  },
+});
 
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__ogsPrismaBase = basePrisma;
-}
-
-export type { PrismaClient } from "./generated/prisma/client.js";
+export type { PrismaClient } from "./generated/prisma/client";

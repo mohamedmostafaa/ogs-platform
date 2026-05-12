@@ -1,0 +1,34 @@
+{
+  "name": "@ogs/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OGS authentication — Better Auth server + per-app OIDC client + guards.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client-config.ts",
+    "./guards": "./src/guards.ts",
+    "./provisioning": "./src/provisioning.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/oauth-provider": "^1.6.11",
+    "@ogs/config": "workspace:*",
+    "@ogs/db": "workspace:*",
+    "better-auth": "^1.6.11",
+    "nanoid": "^5.1.11"
+  },
+  "devDependencies": {
+    "@ogs/eslint-config": "workspace:*",
+    "@ogs/tsconfig": "workspace:*",
+    "@types/node": "^24",
+    "eslint": "^10.3.0",
+    "typescript": "^6.0.3"
+  }
+}

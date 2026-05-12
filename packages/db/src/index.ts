@@ -9,8 +9,8 @@
  *
  * @see Blueprint §16.1.
  */
-import { basePrisma } from "./client.js";
-import { auditExtension, softDeleteExtension, tenantScopeExtension } from "./extensions/index.js";
+import { basePrisma } from "./client";
+import { auditExtension, softDeleteExtension, tenantScopeExtension } from "./extensions/index";
 
 /**
  * Application-facing Prisma client. Layer order is deliberate — see
@@ -21,11 +21,11 @@ export const prisma = basePrisma
   .$extends(softDeleteExtension)
   .$extends(auditExtension);
 
-export { basePrisma } from "./client.js";
-export type { PrismaClient } from "./client.js";
-export { getActor, requireActor, runWithActor } from "./run-with-actor.js";
-export type { ActorContext } from "./run-with-actor.js";
+export { basePrisma } from "./client";
+export type { PrismaClient } from "./client";
+export { getActor, requireActor, runWithActor } from "./run-with-actor";
+export type { ActorContext } from "./run-with-actor";
 
 // Re-export Prisma's namespace + generated types so consumers don't
 // have to dig into `src/generated/prisma`.
-export { Prisma } from "./generated/prisma/client.js";
+export { Prisma } from "./generated/prisma/client";
