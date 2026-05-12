@@ -8,20 +8,20 @@ The single index of every macro task on OGS Wave 1 and the backlog beyond. Atomi
 
 Every agent confirms these before touching code. The Code Reviewer enforces. CI enforces.
 
-| # | Protocol | Where it lives |
-|---|---|---|
-| -1 | Run `pnpm version-check` first; STOP on RED/UNKNOWN. | AGENTS.md §0 rule -1, blueprint §3.2.1 |
-| 0 | Security is the top priority. Ten gates apply on every PR. | SECURITY.md §1 |
-| 0a | Clean code, JSDoc on every export, files ≤ 600 lines. | CODE_STANDARDS.md |
-| 1 | Invoke `superpowers:using-superpowers` then the most-specific skill. | AGENTS.md §6 matrix |
-| 2 | Every PR updates this file. CI gate `verify-tasks-update`. | .github/workflows/pr-discipline.yml |
-| 3 | Atomic steps live in phase plans; macro `[x]` only after every atomic step merges. | docs/plans/ |
-| 4 | Never forge a `[x]`. Weekly Task Curator sweep reverts drift. | AGENTS.md §8 |
-| 5 | Ownership per `AGENTS.md` §1. Hand-off per `AGENTS.md` §4. | AGENTS.md |
-| 6 | No self-merge. Two reviewers minimum; Code Reviewer required. | .github/CODEOWNERS |
-| 7 | Done tasks move to phase Done sub-section. Abandoned tasks move to Archive. | (this file) |
-| 8 | Blueprint deviation → ADR in `docs/adr/` before code. | blueprint §28.3 |
-| 9 | No dead-name patterns in diffs (Next 15 middleware.ts, Prisma `prisma-client-js`, AI SDK `generateObject`, etc.). CI gate `verify-no-dead-names`. | blueprint §3.1.1 |
+| #   | Protocol                                                                                                                                          | Where it lives                         |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| -1  | Run `pnpm version-check` first; STOP on RED/UNKNOWN.                                                                                              | AGENTS.md §0 rule -1, blueprint §3.2.1 |
+| 0   | Security is the top priority. Ten gates apply on every PR.                                                                                        | SECURITY.md §1                         |
+| 0a  | Clean code, JSDoc on every export, files ≤ 600 lines.                                                                                             | CODE_STANDARDS.md                      |
+| 1   | Invoke `superpowers:using-superpowers` then the most-specific skill.                                                                              | AGENTS.md §6 matrix                    |
+| 2   | Every PR updates this file. CI gate `verify-tasks-update`.                                                                                        | .github/workflows/pr-discipline.yml    |
+| 3   | Atomic steps live in phase plans; macro `[x]` only after every atomic step merges.                                                                | docs/plans/                            |
+| 4   | Never forge a `[x]`. Weekly Task Curator sweep reverts drift.                                                                                     | AGENTS.md §8                           |
+| 5   | Ownership per `AGENTS.md` §1. Hand-off per `AGENTS.md` §4.                                                                                        | AGENTS.md                              |
+| 6   | No self-merge. Two reviewers minimum; Code Reviewer required.                                                                                     | .github/CODEOWNERS                     |
+| 7   | Done tasks move to phase Done sub-section. Abandoned tasks move to Archive.                                                                       | (this file)                            |
+| 8   | Blueprint deviation → ADR in `docs/adr/` before code.                                                                                             | blueprint §28.3                        |
+| 9   | No dead-name patterns in diffs (Next 15 middleware.ts, Prisma `prisma-client-js`, AI SDK `generateObject`, etc.). CI gate `verify-no-dead-names`. | blueprint §3.1.1                       |
 
 ## 1. Status legend
 
@@ -31,42 +31,42 @@ Every agent confirms these before touching code. The Code Reviewer enforces. CI 
 
 Each phase pre-allocates a 100-block. New IDs use the next free integer in their phase's block. Letter-suffixed IDs are deprecated; existing ones are grandfathered and listed verbatim.
 
-| Phase | ID block | Plan file |
-|---|---|---|
-| 00 — Repository bootstrap | OGS-001 … OGS-099 | [`docs/plans/phase-00-bootstrap.md`](docs/plans/phase-00-bootstrap.md) |
-| 01 — Foundation rails | OGS-100 … OGS-199 (grandfathered: 030, 031, 040–061, 070–073, 080–085, 090–104, 110–111) | [`docs/plans/phase-01-foundation-rails.md`](docs/plans/phase-01-foundation-rails.md) |
-| 02 — Identity hub | OGS-200 … OGS-299 (grandfathered: 120–164) | [`docs/plans/phase-02-identity-hub.md`](docs/plans/phase-02-identity-hub.md) |
-| 03 — Live-video shell | OGS-300 … OGS-399 (grandfathered: 170–191) | [`docs/plans/phase-03-live-video-shell.md`](docs/plans/phase-03-live-video-shell.md) |
-| 04 — Careers vertical slice | OGS-400 … OGS-499 (grandfathered: 200–282) | [`docs/plans/phase-04-careers-vertical.md`](docs/plans/phase-04-careers-vertical.md) |
-| 05 — Academy + SkillPass | OGS-500 … OGS-599 (grandfathered: 300–382) | [`docs/plans/phase-05-academy-skillpass.md`](docs/plans/phase-05-academy-skillpass.md) |
-| 06 — AI summarizer + tutor | OGS-600 … OGS-699 (grandfathered: 400–426) | [`docs/plans/phase-06-ai-summarizer-tutor.md`](docs/plans/phase-06-ai-summarizer-tutor.md) |
-| 07 — AI proctoring + oral viva | OGS-700 … OGS-799 (grandfathered: 440–462) | [`docs/plans/phase-07-ai-proctoring-viva.md`](docs/plans/phase-07-ai-proctoring-viva.md) |
-| 08 — AI eval framework + cost dashboard | OGS-800 … OGS-899 (grandfathered: 470–492) | [`docs/plans/phase-08-ai-evals-cost.md`](docs/plans/phase-08-ai-evals-cost.md) |
-| 09 — Admin + payments hardening | OGS-900 … OGS-999 (grandfathered: 500–553) | [`docs/plans/phase-09-admin-payments.md`](docs/plans/phase-09-admin-payments.md) |
-| 10 — Hardening and pilot launch | OGS-1000 … OGS-1099 (grandfathered: 600–651) | [`docs/plans/phase-10-launch.md`](docs/plans/phase-10-launch.md) |
-| XC — Cross-cutting tracks | OGS-1100 … OGS-1199 (grandfathered: 700–751) | [`docs/plans/phase-XC-cross-cutting.md`](docs/plans/phase-XC-cross-cutting.md) |
-| W2 — Wave 2 backlog | OGS-2000 + | (per-feature plan opens when W2 starts) |
-| W3 — Wave 3 backlog | OGS-3000 + | (per-feature plan opens when W3 starts) |
-| Future | OGS-9000 + | (Year 2+) |
+| Phase                                   | ID block                                                                                 | Plan file                                                                                  |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 00 — Repository bootstrap               | OGS-001 … OGS-099                                                                        | [`docs/plans/phase-00-bootstrap.md`](docs/plans/phase-00-bootstrap.md)                     |
+| 01 — Foundation rails                   | OGS-100 … OGS-199 (grandfathered: 030, 031, 040–061, 070–073, 080–085, 090–104, 110–111) | [`docs/plans/phase-01-foundation-rails.md`](docs/plans/phase-01-foundation-rails.md)       |
+| 02 — Identity hub                       | OGS-200 … OGS-299 (grandfathered: 120–164)                                               | [`docs/plans/phase-02-identity-hub.md`](docs/plans/phase-02-identity-hub.md)               |
+| 03 — Live-video shell                   | OGS-300 … OGS-399 (grandfathered: 170–191)                                               | [`docs/plans/phase-03-live-video-shell.md`](docs/plans/phase-03-live-video-shell.md)       |
+| 04 — Careers vertical slice             | OGS-400 … OGS-499 (grandfathered: 200–282)                                               | [`docs/plans/phase-04-careers-vertical.md`](docs/plans/phase-04-careers-vertical.md)       |
+| 05 — Academy + SkillPass                | OGS-500 … OGS-599 (grandfathered: 300–382)                                               | [`docs/plans/phase-05-academy-skillpass.md`](docs/plans/phase-05-academy-skillpass.md)     |
+| 06 — AI summarizer + tutor              | OGS-600 … OGS-699 (grandfathered: 400–426)                                               | [`docs/plans/phase-06-ai-summarizer-tutor.md`](docs/plans/phase-06-ai-summarizer-tutor.md) |
+| 07 — AI proctoring + oral viva          | OGS-700 … OGS-799 (grandfathered: 440–462)                                               | [`docs/plans/phase-07-ai-proctoring-viva.md`](docs/plans/phase-07-ai-proctoring-viva.md)   |
+| 08 — AI eval framework + cost dashboard | OGS-800 … OGS-899 (grandfathered: 470–492)                                               | [`docs/plans/phase-08-ai-evals-cost.md`](docs/plans/phase-08-ai-evals-cost.md)             |
+| 09 — Admin + payments hardening         | OGS-900 … OGS-999 (grandfathered: 500–553)                                               | [`docs/plans/phase-09-admin-payments.md`](docs/plans/phase-09-admin-payments.md)           |
+| 10 — Hardening and pilot launch         | OGS-1000 … OGS-1099 (grandfathered: 600–651)                                             | [`docs/plans/phase-10-launch.md`](docs/plans/phase-10-launch.md)                           |
+| XC — Cross-cutting tracks               | OGS-1100 … OGS-1199 (grandfathered: 700–751)                                             | [`docs/plans/phase-XC-cross-cutting.md`](docs/plans/phase-XC-cross-cutting.md)             |
+| W2 — Wave 2 backlog                     | OGS-2000 +                                                                               | (per-feature plan opens when W2 starts)                                                    |
+| W3 — Wave 3 backlog                     | OGS-3000 +                                                                               | (per-feature plan opens when W3 starts)                                                    |
+| Future                                  | OGS-9000 +                                                                               | (Year 2+)                                                                                  |
 
 ## 3. Status dashboard
 
 Updated by the Task Curator's weekly sweep (Mondays). Generated by `pnpm --filter @ogs/tooling status-sweep` once that script exists; until then maintained by hand.
 
-| Phase | `[ ]` | `[~]` | `[x]` | `[!]` | `[?]` |
-|---|---|---|---|---|---|
-| 00 — Bootstrap | 33 | 0 | 0 | 0 | 0 |
-| 01 — Foundation | 54 | 0 | 0 | 0 | 0 |
-| 02 — Identity hub | 26 | 0 | 0 | 0 | 0 |
-| 03 — Live-video shell | 18 | 0 | 0 | 0 | 0 |
-| 04 — Careers vertical | TBD (JIT) | 0 | 0 | 0 | 0 |
-| 05 — Academy + SkillPass | TBD (JIT) | 0 | 0 | 0 | 0 |
-| 06 — AI summarizer + tutor | TBD (JIT) | 0 | 0 | 0 | 0 |
-| 07 — AI proctoring + viva | TBD (JIT) | 0 | 0 | 0 | 0 |
-| 08 — AI evals + cost | TBD (JIT) | 0 | 0 | 0 | 0 |
-| 09 — Admin + payments | TBD (JIT) | 0 | 0 | 0 | 0 |
-| 10 — Launch | TBD (JIT) | 0 | 0 | 0 | 0 |
-| XC — Cross-cutting | 16 | 0 | 0 | 0 | 0 |
+| Phase                      | `[ ]`     | `[~]` | `[x]` | `[!]` | `[?]` |
+| -------------------------- | --------- | ----- | ----- | ----- | ----- |
+| 00 — Bootstrap             | 33        | 0     | 0     | 0     | 0     |
+| 01 — Foundation            | 54        | 0     | 0     | 0     | 0     |
+| 02 — Identity hub          | 26        | 0     | 0     | 0     | 0     |
+| 03 — Live-video shell      | 18        | 0     | 0     | 0     | 0     |
+| 04 — Careers vertical      | TBD (JIT) | 0     | 0     | 0     | 0     |
+| 05 — Academy + SkillPass   | TBD (JIT) | 0     | 0     | 0     | 0     |
+| 06 — AI summarizer + tutor | TBD (JIT) | 0     | 0     | 0     | 0     |
+| 07 — AI proctoring + viva  | TBD (JIT) | 0     | 0     | 0     | 0     |
+| 08 — AI evals + cost       | TBD (JIT) | 0     | 0     | 0     | 0     |
+| 09 — Admin + payments      | TBD (JIT) | 0     | 0     | 0     | 0     |
+| 10 — Launch                | TBD (JIT) | 0     | 0     | 0     | 0     |
+| XC — Cross-cutting         | 16        | 0     | 0     | 0     | 0     |
 
 > Phases 04 – 10 macro counts populate when the Engineering Lead expands the phase plan to atomic steps on the Friday before that phase opens (see `docs/plans/_template.md`).
 
@@ -105,7 +105,7 @@ Updated by the Task Curator's weekly sweep (Mondays). Generated by `pnpm --filte
 
 - [ ] `OGS-013` Neon project + dev branch; `.env.example` placeholders — @devops-engineer — §3.3
 - [ ] `OGS-014` Enable `pgvector` 0.8 on Neon — @database-engineer — §5.4
-- [ ] `OGS-015` Vercel team + 8 projects — @devops-engineer — §3.3
+- [x] `OGS-015` Vercel team + 8 projects — @devops-engineer — §3.3
 - [ ] `OGS-016` Vercel env vars from `.env.example` (every key in blueprint §28.1) — @devops-engineer + @security-engineer — §28.1
 - [ ] `OGS-017` Sentry org + 8 projects — @devops-engineer — §22.7
 - [ ] `OGS-018` Cloudflare DNS for every domain in §2.1 — @devops-engineer + @engineering-lead — §1.2
@@ -124,8 +124,8 @@ Updated by the Task Curator's weekly sweep (Mondays). Generated by `pnpm --filte
 
 ### Hello-world apps + scaffold + runbooks
 
-- [ ] `OGS-019` Hello-world `apps/web-id` (renders OGS logo) — @auth-engineer — §29.10
-- [ ] `OGS-020` Hello-world remaining 7 apps + workers — @devops-engineer — §29.10
+- [x] `OGS-019` Hello-world `apps/web-id` (renders OGS logo) — @auth-engineer — §29.10
+- [x] `OGS-020` Hello-world remaining 7 apps + workers — @devops-engineer — §29.10
 - [x] `OGS-024` ADR scaffolding (`0000-template.md`, `INDEX.md`) — @docs-writer — §28.3
 - [ ] `OGS-025` Local dev runbook — @docs-writer — §29
 
@@ -260,7 +260,7 @@ Updated by the Task Curator's weekly sweep (Mondays). Generated by `pnpm --filte
 
 ### Admin role gate + seed
 
-- [ ] `OGS-160` `apps/web-admin/src/proxy.ts` OGS_* role gate (Next.js 16 proxy) — @auth-engineer — §6.12
+- [ ] `OGS-160` `apps/web-admin/src/proxy.ts` OGS\_\* role gate (Next.js 16 proxy) — @auth-engineer — §6.12
 - [ ] `OGS-161` Seed one `OGS_SUPER_ADMIN` membership — @database-engineer — §5
 
 ### Arcjet on auth routes (Phase-2 composition)
@@ -313,11 +313,13 @@ A hardcoded LiveSession id opens a Stream room with lobby → active → ended. 
 **Owners.** @frontend-feature-engineer (lead), @api-engineer, @ai-engineer, @inngest-engineer, @payments-engineer, @notifications-engineer, @ui-engineer, @qa-engineer.
 
 Notable Arcjet entries:
+
 - `OGS-247` Apply Arcjet `publicForm` on `/apply/[slug]` Flow K
 - `OGS-248` Apply Arcjet `mutation` token-bucket inside `application.create` tRPC procedure
 - `OGS-249` Apply Arcjet `mutation` on CV-upload presign
 
 Stack-currency entries baked into the macro list:
+
 - Stripe 22 with `apiVersion: "2026-03-25.dahlia"` (OGS-272)
 - Vercel AI SDK v6 patterns in CV_PARSE_V1 / JOB_MATCH_V1 (OGS-214, OGS-253)
 - Inngest v4 trigger-in-options shape (every fn task)
@@ -331,6 +333,7 @@ Stack-currency entries baked into the macro list:
 **Owners.** @frontend-feature-engineer (lead), @files-vod-engineer, @api-engineer, @inngest-engineer, @ai-engineer, @ui-engineer, @i18n-engineer.
 
 Notable stack-currency entries:
+
 - Bunny.net Stream (NOT Mux) for VOD; hls.js for the player (OGS-310 through OGS-314)
 - Bilingual cert PDFs via @react-pdf/renderer 4 + the v4 next-intl `await requestLocale` pattern (OGS-380, OGS-381, OGS-382)
 
@@ -343,6 +346,7 @@ Notable stack-currency entries:
 **Owners.** @ai-engineer (lead), @inngest-engineer, @live-video-engineer, @security-engineer.
 
 Notable stack-currency entries:
+
 - Vercel AI SDK v6 `generateText({ output: { type: "object", schema } })` — every task in `packages/ai/src/tasks/*`
 - Inngest v4 trigger-in-options in `summarize-live-session`
 - stream-chat-react 14: `MessageComposer` (not `MessageInput`), `WithComponents` for Channel overrides, hooks (not HOCs)
@@ -373,6 +377,7 @@ Notable stack-currency entries:
 **Owners.** @payments-engineer (lead), @security-engineer, @frontend-feature-engineer, @inngest-engineer, @ui-engineer, @auth-engineer.
 
 Notable stack-currency entries:
+
 - Stripe 22 (`2026-03-25.dahlia`), Lemon Squeezy 4, Polar 0.47, PayMob v1 — admin switcher
 - 2FA step-up on switcher writes
 - AES-256-GCM encryption envelope with key rotation
@@ -432,9 +437,9 @@ Backlogs open into per-feature plan files when their wave opens. ID blocks reser
 
 ADRs accepted. Each ADR lives in `docs/adr/<NNNN>-<slug>.md`.
 
-| # | Date | Topic | ADR | Status |
-|---|---|---|---|---|
-| — | — | (no ADRs yet) | — | — |
+| #   | Date | Topic         | ADR | Status |
+| --- | ---- | ------------- | --- | ------ |
+| —   | —    | (no ADRs yet) | —   | —      |
 
 ---
 
@@ -443,8 +448,8 @@ ADRs accepted. Each ADR lives in `docs/adr/<NNNN>-<slug>.md`.
 Tasks marked `[!]`. Each blocker has a path to resolution.
 
 | Task ID | Title | Owner | Since | Blocks | Resolution path |
-|---|---|---|---|---|---|
-| — | — | — | — | — | — |
+| ------- | ----- | ----- | ----- | ------ | --------------- |
+| —       | —     | —     | —     | —      | —               |
 
 ---
 
@@ -452,16 +457,16 @@ Tasks marked `[!]`. Each blocker has a path to resolution.
 
 Reviewed every Monday in the engineering sync.
 
-| ID | Risk | Likelihood | Impact | Mitigation | Owner |
-|---|---|---|---|---|---|
-| R-01 | Iraqi payment gateway not selected by Week 12 | Medium | Medium | Stripe + manual invoice until partner chosen | @engineering-lead |
-| R-02 | Bunny.net Stream MENA CDN below expectations | Low | Medium | Benchmark in Phase 5; ADR-gated fallback | @files-vod-engineer |
-| R-03 | AI cost overruns past USD 2 / MAU | Medium | High | Cost dashboard + per-tenant alerts + Haiku fallback | @ai-engineer |
-| R-04 | Stream.io recording quotas | Low | Medium | Track usage in admin / observability | @live-video-engineer |
-| R-05 | OIDC SSO cookie edge cases across 7 subdomains | Medium | High | Cross-domain test matrix in CI | @auth-engineer |
-| R-06 | ISO 17024 readiness drift | High | High | Soft-delete + audit-log invariants; security gates per PR | @security-engineer |
-| R-07 | Super-admin role concentration | Medium | High | Two-person rule + 2FA step-up + audit log | @security-engineer |
-| R-08 | New majors land mid-wave (Next.js / Prisma / AI SDK) | Medium | Medium | `pnpm version-check` nightly + `verify-no-dead-names` CI + per-bump ADR | @architecture-reviewer |
+| ID   | Risk                                                 | Likelihood | Impact | Mitigation                                                              | Owner                  |
+| ---- | ---------------------------------------------------- | ---------- | ------ | ----------------------------------------------------------------------- | ---------------------- |
+| R-01 | Iraqi payment gateway not selected by Week 12        | Medium     | Medium | Stripe + manual invoice until partner chosen                            | @engineering-lead      |
+| R-02 | Bunny.net Stream MENA CDN below expectations         | Low        | Medium | Benchmark in Phase 5; ADR-gated fallback                                | @files-vod-engineer    |
+| R-03 | AI cost overruns past USD 2 / MAU                    | Medium     | High   | Cost dashboard + per-tenant alerts + Haiku fallback                     | @ai-engineer           |
+| R-04 | Stream.io recording quotas                           | Low        | Medium | Track usage in admin / observability                                    | @live-video-engineer   |
+| R-05 | OIDC SSO cookie edge cases across 7 subdomains       | Medium     | High   | Cross-domain test matrix in CI                                          | @auth-engineer         |
+| R-06 | ISO 17024 readiness drift                            | High       | High   | Soft-delete + audit-log invariants; security gates per PR               | @security-engineer     |
+| R-07 | Super-admin role concentration                       | Medium     | High   | Two-person rule + 2FA step-up + audit log                               | @security-engineer     |
+| R-08 | New majors land mid-wave (Next.js / Prisma / AI SDK) | Medium     | Medium | `pnpm version-check` nightly + `verify-no-dead-names` CI + per-bump ADR | @architecture-reviewer |
 
 ---
 
@@ -469,8 +474,8 @@ Reviewed every Monday in the engineering sync.
 
 Abandoned tasks. Never deleted. Reason and timestamp required.
 
-| Task ID | Title | Reason | Date |
-|---|---|---|---|
+| Task ID    | Title                     | Reason                               | Date       |
+| ---------- | ------------------------- | ------------------------------------ | ---------- |
 | `OGS-029a` | (renumbered to `OGS-032`) | Cleanup — letter suffixes deprecated | 2026-05-11 |
 | `OGS-029b` | (renumbered to `OGS-033`) | Cleanup — letter suffixes deprecated | 2026-05-11 |
 
