@@ -1,0 +1,32 @@
+{
+  "name": "@ogs/security",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OGS shared security primitives — Arcjet rule sets, encryption helpers, IP allow-lists.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./arcjet": "./src/arcjet/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arcjet/inspect": "^1.4.0",
+    "@arcjet/next": "^1.4.0"
+  },
+  "devDependencies": {
+    "@ogs/eslint-config": "workspace:*",
+    "@ogs/tsconfig": "workspace:*",
+    "@types/node": "^24",
+    "eslint": "^10.3.0",
+    "next": "16.2.6",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "next": "^16.2.0"
+  }
+}
