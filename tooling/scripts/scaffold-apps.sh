@@ -77,7 +77,6 @@ EOF
 {
   "extends": "@ogs/tsconfig/nextjs.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     }
