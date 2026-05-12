@@ -15,4 +15,5 @@ export * from "./entityx";
 export * from "./avatar";
 export * from "./theme";
 export * from "./hooks";
+export * from "./app-shell";
 export { cn } from "./lib/cn";

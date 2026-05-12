@@ -71,6 +71,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -87,6 +90,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -102,6 +108,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -111,6 +120,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -127,6 +139,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -142,6 +157,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -151,6 +169,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -167,6 +188,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -182,6 +206,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -191,6 +218,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -207,6 +237,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -222,6 +255,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -231,6 +267,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -247,6 +286,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -262,6 +304,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -271,6 +316,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -287,6 +335,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -302,6 +353,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -393,6 +447,9 @@ importers:
       '@ogs/security':
         specifier: workspace:*
         version: link:../../packages/security
+      '@ogs/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -409,6 +466,9 @@ importers:
       '@ogs/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/tsconfig
+      '@tailwindcss/postcss':
+        specifier: ^4.3.0
+        version: 4.3.0
       '@types/node':
         specifier: ^24
         version: 24.12.3
@@ -424,6 +484,9 @@ importers:
       eslint-config-next:
         specifier: 16.2.6
         version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.3.0(jiti@2.7.0))(typescript@6.0.3)
+      tailwindcss:
+        specifier: ^4.3.0
+        version: 4.3.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3

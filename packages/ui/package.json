@@ -11,6 +11,7 @@
     "./avatar": "./src/avatar/index.ts",
     "./theme": "./src/theme/index.ts",
     "./hooks": "./src/hooks/index.ts",
+    "./app-shell": "./src/app-shell/index.ts",
     "./assets/agent-avatars": "./src/assets/agent-avatars/index.ts",
     "./lib/cn": "./src/lib/cn.ts",
     "./styles/globals.css": "./styles/globals.css"

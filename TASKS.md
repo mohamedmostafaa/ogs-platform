@@ -228,8 +228,8 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 
 ### App shells consuming @ogs/ui
 
-- [ ] `OGS-110` Bootstrap `apps/web-id` shell with OGS logo home page using @ogs/ui + theme toggle — @auth-engineer — §29.10
-- [ ] `OGS-111` Bootstrap remaining 7 apps + workers with the same shell — @devops-engineer — §29.10
+- [x] `OGS-110` Bootstrap `apps/web-id` shell with OGS logo home page using @ogs/ui + theme toggle — @auth-engineer — §29.10
+- [x] `OGS-111` Bootstrap remaining 7 apps with shared `<AppShell>` primitive — @devops-engineer + @ui-engineer — §29.10 (workers are not Next.js apps — deferred to Phase 03)
 
 ### Phase 01 exit gate
 
