@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 
 import { OgsThemeProvider } from "@ogs/ui/theme";
 
+import { TRPCReactProvider } from "~/lib/trpc";
+
 export const metadata: Metadata = {
   title: "OGS Identity",
   description: "OGS Identity — workforce-trust SSO hub.",
@@ -18,7 +20,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background text-foreground min-h-screen antialiased">
-        <OgsThemeProvider>{children}</OgsThemeProvider>
+        <OgsThemeProvider>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </OgsThemeProvider>
       </body>
     </html>
   );

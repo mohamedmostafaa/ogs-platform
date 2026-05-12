@@ -14,6 +14,7 @@ Superseded, or Rejected.
 | [0003](./0003-prisma-client-and-audit-gate.md) | Lazy Prisma client + Gate-4 fail-loud audit + tenantId on child models                 | Accepted |
 | [0004](./0004-auth-guard-hardening.md)         | Auth guard hardening — mandatory tenantSlug, prod URL guard, FF DSL scope, signup hook | Accepted |
 | [0005](./0005-phase-a-audit-resolution.md)     | Phase-A audit resolution log — 16 closed, 2 false positives, 0 open                    | Accepted |
+| [0006](./0006-runwithactor-scope.md)           | `runWithActor` moves from request context to `tenantProcedure` middleware              | Accepted |
 
 Add new ADRs by copying `0000-template.md` to `NNNN-<slug>.md` and bumping
 this index in the same PR.

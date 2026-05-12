@@ -1,43 +1,47 @@
 {
-  "name": "@ogs/id",
+  "name": "@ogs/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "OGS tRPC v11 router shell + server helpers + browser client factory.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./trpc": "./src/trpc.ts",
+    "./root": "./src/root.ts",
+    "./context": "./src/context.ts",
+    "./client": "./src/client.tsx",
+    "./server-helpers": "./src/server-helpers.tsx",
+    "./query-client": "./src/query-client.ts"
+  },
   "scripts": {
-    "dev": "next dev --turbo --port 3000",
-    "build": "next build",
-    "start": "next start --port 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
-    "@ogs/api": "workspace:*",
     "@ogs/auth": "workspace:*",
     "@ogs/config": "workspace:*",
     "@ogs/db": "workspace:*",
-    "@ogs/security": "workspace:*",
-    "@ogs/ui": "workspace:*",
     "@tanstack/react-query": "^5.100.10",
     "@trpc/client": "^11.17.0",
     "@trpc/react-query": "^11.17.0",
     "@trpc/server": "^11.17.0",
-    "better-auth": "^1.6.11",
-    "lucide-react": "^1.14.0",
-    "superjson": "^2.2.6"
+    "superjson": "^2.2.6",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@ogs/eslint-config": "workspace:*",
     "@ogs/tsconfig": "workspace:*",
     "@types/node": "^24",
     "@types/react": "^19",
-    "@types/react-dom": "^19",
     "eslint": "^10.3.0",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4.3.0",
-    "@tailwindcss/postcss": "^4.3.0",
+    "next": "16.2.6",
+    "react": "19.2.6",
     "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "next": "^16.2.0",
+    "react": "^19"
   }
 }

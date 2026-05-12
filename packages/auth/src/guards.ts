@@ -140,11 +140,15 @@ export function actorFromSession(
     userAgent?: string;
   },
 ): ActorContext {
+  // `exactOptionalPropertyTypes` rejects explicitly-undefined optional
+  // fields; spread only the keys that have a real value. Use
+  // `!== undefined` (NOT truthy) so an empty string survives — empty
+  // strings are unlikely but should not silently disappear.
   return {
     tenantId: options.tenantId,
     actorUserId: session.user.id,
-    correlationId: options.correlationId,
-    ipAddress: options.ipAddress,
-    userAgent: options.userAgent,
+    ...(options.correlationId !== undefined ? { correlationId: options.correlationId } : {}),
+    ...(options.ipAddress !== undefined ? { ipAddress: options.ipAddress } : {}),
+    ...(options.userAgent !== undefined ? { userAgent: options.userAgent } : {}),
   };
 }
