@@ -61,7 +61,7 @@ export function AgentAvatar({ agent, glyph, tone, size = "md", className }: Agen
         must never be mistakable for a human user"), the pill MUST
         have high contrast against the page background — we use
         primary-on-primary-foreground rather than a faint outlined dot.
-        The pill is bottom-right at 30% of the avatar's diameter so
+        The pill is bottom-right at 35% of the avatar's diameter so
         it's clearly visible at every size.
       */}
       <span

@@ -14,8 +14,10 @@ model FeatureFlag {
   key         String
   /// Null = global default; non-null = tenant-specific override.
   tenantId    String?
-  /// True / false / "percentage:25" / "users:[id1,id2]" — string DSL.
-  /// Validated in @ogs/auth/guards.ts:requireFeature().
+  /// **Phase-1 DSL:** only the literal `"true"` is treated as ON
+  /// (case-insensitive, trimmed). Anything else fails closed.
+  /// Phase-2 will extend to `"percentage:N"` and `"users:[id1,id2]"`.
+  /// Validated in `@ogs/auth/guards.ts:requireFeature()`.
   value       String
   description String?
   createdAt   DateTime @default(now())

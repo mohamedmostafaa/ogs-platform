@@ -7,6 +7,10 @@ name: verify-no-dead-names
 
 on:
   pull_request:
+  push:
+    # Backstop for direct pushes to main (merge-queue, admin force-push,
+    # etc.) so the scan can't be bypassed.
+    branches: [main]
 
 jobs:
   scan:
@@ -19,8 +23,21 @@ jobs:
       - name: Scan added lines for dead names
         shell: bash
         run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
+          # On PR: diff the PR's base..head. On push: diff the push's
+          # before..sha so we catch any forbidden patterns landing
+          # directly on main via merge-queue / admin push.
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.sha }}"
+            HEAD="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+            # First-push to a fresh branch has BASE=0000...; in that
+            # case diff against an empty tree.
+            if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then
+              BASE=$(git hash-object -t tree /dev/null)
+            fi
+          fi
           # Diff only added lines (+) under apps/** or packages/**
           # The exclusion paths keep the blueprint, security charter, and code-reviewer
           # checklist out of the scan, since they intentionally name these patterns

@@ -22,6 +22,15 @@ export default async function proxy(req: NextRequest) {
   const pathname = new URL(req.url).pathname;
 
   if (pathname.startsWith("/api/auth")) {
+    // `get-session` is a high-frequency read (clients poll on tab
+    // focus, SWR-revalidate) that doesn't accept credentials.
+    // Routing it through the strict 10/min/IP bucket would starve
+    // legitimate dashboards under shared NAT. Credential-bearing
+    // sub-paths (sign-in, sign-up, callback/*, verify-otp) keep the
+    // tight bucket.
+    if (pathname === "/api/auth/get-session") {
+      return protectInProxy(publicShield, req);
+    }
     return protectInProxy(authEndpoint, req);
   }
 

@@ -13,6 +13,7 @@ Superseded, or Rejected.
 | [0002](./0002-arcjet-rule-set-naming.md)       | Arcjet rule-set naming + add `authEndpoint` + `aiEndpoint`                             | Accepted |
 | [0003](./0003-prisma-client-and-audit-gate.md) | Lazy Prisma client + Gate-4 fail-loud audit + tenantId on child models                 | Accepted |
 | [0004](./0004-auth-guard-hardening.md)         | Auth guard hardening — mandatory tenantSlug, prod URL guard, FF DSL scope, signup hook | Accepted |
+| [0005](./0005-phase-a-audit-resolution.md)     | Phase-A audit resolution log — 16 closed, 2 false positives, 0 open                    | Accepted |
 
 Add new ADRs by copying `0000-template.md` to `NNNN-<slug>.md` and bumping
 this index in the same PR.
