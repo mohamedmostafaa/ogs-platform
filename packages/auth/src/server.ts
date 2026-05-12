@@ -22,6 +22,7 @@ import { nextCookies } from "better-auth/next-js";
 import { jwt } from "better-auth/plugins";
 
 import { prisma } from "@ogs/db";
+import { sendPasswordResetEmail, sendVerifyEmail } from "@ogs/email";
 
 import { getAuthBaseUrl, getAuthSecret } from "./env";
 import { provisionUser } from "./provisioning";
@@ -71,10 +72,39 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,
-    // Email verification + password reset flows wire to @ogs/email in
-    // Phase 02 — at that point we set sendVerificationEmail + similar.
     autoSignIn: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
+    // Password-reset hook lives on `emailAndPassword` per Better Auth 1.6.
+    // Verification email hook is on top-level `emailVerification` (see
+    // below) — putting it here is a silent no-op in 1.6.
+    sendResetPassword: async ({ user, url }, request) => {
+      const ip = request?.headers?.get("x-forwarded-for")?.split(",")[0]?.trim();
+      await sendPasswordResetEmail({
+        to: user.email,
+        resetUrl: url,
+        appName: "OGS Identity",
+        ...(ip ? { ipAddress: ip } : {}),
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    /**
+     * Better Auth 1.6 reads `sendVerificationEmail` ONLY from the
+     * top-level `emailVerification` block. Earlier draft placed this
+     * under `emailAndPassword`, which compiled silently but never
+     * fired at runtime — caught by the Phase-02 code-reviewer pass
+     * before push (verified against
+     * @better-auth/core/src/types/init-options.ts:546).
+     */
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerifyEmail({
+        to: user.email,
+        verifyUrl: url,
+        appName: "OGS Identity",
+      });
+    },
   },
   socialProviders: Object.fromEntries(
     Object.entries(socialProviders).filter(([, v]) => v !== undefined),

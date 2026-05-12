@@ -21,6 +21,7 @@
     "@better-auth/oauth-provider": "^1.6.11",
     "@ogs/config": "workspace:*",
     "@ogs/db": "workspace:*",
+    "@ogs/email": "workspace:*",
     "better-auth": "^1.6.11",
     "nanoid": "^5.1.11"
   },

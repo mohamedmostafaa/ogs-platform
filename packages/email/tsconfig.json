@@ -3,12 +3,8 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["ES2022", "DOM"],
-    "jsx": "preserve",
-    // ^ Required because `@ogs/email` is a source-only workspace package
-    //   (no build step), so tsc resolves the React Email templates'
-    //   `.tsx` source when typechecking the `send*` imports. Switch to
-    //   a no-jsx setting after `@ogs/email` ships emitted `.d.ts`.
+    "lib": ["ES2022"],
+    "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": true,
@@ -19,8 +15,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "rootDir": ".",
-    "types": ["node"]
+    "types": ["node", "react"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]
 }
