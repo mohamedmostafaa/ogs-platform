@@ -26,6 +26,8 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@ogs/eslint-config": "workspace:*",
+    "@ogs/tsconfig": "workspace:*",
     "@types/node": "^24",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",

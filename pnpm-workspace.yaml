@@ -1,7 +1,13 @@
 # pnpm 11 workspaces declaration.
-# pnpm-specific settings (catalog, hoisting, allowBuilds) belong here, NOT in .npmrc.
-# See blueprint §4.7 and pnpm 11 migration notes in §3.1.1.
+# pnpm-specific settings (catalog, hoisting, build allow-list) belong here,
+# NOT in .npmrc — see blueprint §4.7 and pnpm 11 migration notes in §3.1.1.
 packages:
   - "apps/*"
   - "packages/*"
   - "tooling/*"
+allowBuilds:
+  esbuild: true
+  inngest-cli: true
+onlyBuiltDependencies:
+  - esbuild
+  - inngest-cli
