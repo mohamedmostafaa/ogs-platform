@@ -19,7 +19,8 @@ import { config as loadDotenv } from "dotenv";
 // DATABASE_URL at module-load time.
 loadDotenv({ path: new URL("../../../.env.local", import.meta.url).pathname });
 
-const { basePrisma } = await import("../src/client.js");
+const { getBasePrisma } = await import("../src/client.js");
+const basePrisma = getBasePrisma();
 
 if (process.env.NODE_ENV === "production" && process.env.OGS_ALLOW_SEED !== "1") {
   console.error("[seed] refusing to seed production — set OGS_ALLOW_SEED=1 to override.");

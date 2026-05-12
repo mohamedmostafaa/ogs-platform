@@ -2,12 +2,21 @@
  * Runtime Prisma client — wraps the generated client with the
  * `@prisma/adapter-pg` driver adapter (mandatory in Prisma 7).
  *
- * The client is instantiated once at module load and cached on
- * `globalThis` to survive Next.js hot reloads.
+ * Client construction is **deferred** until `getBasePrisma()` is
+ * called (the function), NOT until a property is accessed via a Proxy.
+ * This matters because:
+ *   - `next build` evaluates module top-levels for route discovery
+ *     without DATABASE_URL — using `getBasePrisma()` lazily avoids the
+ *     crash without a Proxy.
+ *   - A real `PrismaClient` (not a Proxy) preserves Prisma's internal
+ *     class identity, `$transaction` callback identity, the `$extends`
+ *     chain, and any `instanceof` checks.
+ *
+ * The instance is cached on `globalThis` to survive Next.js HMR.
  *
  * Consumers should NOT import this file directly — they should import
- * the composed client from `./index.ts`, which layers soft-delete,
- * tenant-scope, and audit extensions on top.
+ * the composed `prisma` from `./index.ts`, which layers tenant-scope,
+ * soft-delete, and audit extensions on top.
  *
  * @see Blueprint §5.4.3, §16.1.
  */
@@ -30,32 +39,39 @@ function resolveConnectionString(): string {
 
   // Build-time fallback. `next build` evaluates module top-levels
   // (NODE_ENV=production, NEXT_PHASE=phase-production-build) without
-  // env vars loaded, just to introspect route metadata. Prisma's driver
-  // adapter is lazy — handing it a placeholder URL is safe. Real
-  // requests will set DATABASE_URL via Vercel's runtime env.
+  // env vars loaded. createClient() refuses to actually return this
+  // client at request time — see the guard below.
   return "postgresql://build-time-placeholder@localhost:5432/placeholder";
 }
 
 function createClient(): PrismaClient {
-  const adapter = new PrismaPg({ connectionString: resolveConnectionString() });
+  const url = resolveConnectionString();
+  // Defence in depth: never connect to the placeholder at request time.
+  // If we somehow reach createClient() during a real request without
+  // DATABASE_URL set, fail loud.
+  if (
+    url.includes("build-time-placeholder") &&
+    process.env.NEXT_PHASE !== "phase-production-build" &&
+    process.env.NODE_ENV !== "test"
+  ) {
+    throw new Error(
+      "[@ogs/db] DATABASE_URL not set at request time. See docs/runbooks/local-dev.md.",
+    );
+  }
+  const adapter = new PrismaPg({ connectionString: url });
   return new PrismaClient({ adapter });
 }
 
 /**
- * Lazy singleton — the actual `new PrismaClient(...)` call is deferred
- * until first property access. This prevents `next build` from crashing
- * during route discovery (which evaluates module top-levels without
- * env vars loaded). Cached on `globalThis` to survive Next.js HMR.
+ * Lazily resolves the unextended Prisma client. Composed by
+ * `./index.ts`. Application code imports the composed `prisma` from
+ * `@ogs/db`, not this function.
  */
-export const basePrisma: PrismaClient = new Proxy({} as PrismaClient, {
-  get(_target, prop) {
-    if (!globalThis.__ogsPrismaBase) {
-      globalThis.__ogsPrismaBase = createClient();
-    }
-    const client = globalThis.__ogsPrismaBase;
-    const value = client[prop as keyof PrismaClient];
-    return typeof value === "function" ? (value as Function).bind(client) : value;
-  },
-});
+export function getBasePrisma(): PrismaClient {
+  if (!globalThis.__ogsPrismaBase) {
+    globalThis.__ogsPrismaBase = createClient();
+  }
+  return globalThis.__ogsPrismaBase;
+}
 
 export type { PrismaClient } from "./generated/prisma/client";

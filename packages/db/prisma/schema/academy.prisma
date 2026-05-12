@@ -32,6 +32,7 @@ model Course {
 
 model Lesson {
   id          String    @id @default(cuid())
+  tenantId    String
   courseId    String
   /// Display order (1-based).
   position    Int
@@ -52,7 +53,7 @@ model Lesson {
   progress LessonProgress[]
 
   @@unique([courseId, position])
-  @@index([courseId, deletedAt])
+  @@index([tenantId, courseId, deletedAt])
 }
 
 model Enrollment {
@@ -78,6 +79,7 @@ model Enrollment {
 
 model LessonProgress {
   id              String    @id @default(cuid())
+  tenantId        String
   enrollmentId    String
   lessonId        String
   /// 0-100; 100 = complete.
@@ -90,5 +92,5 @@ model LessonProgress {
   lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([enrollmentId, lessonId])
-  @@index([lessonId])
+  @@index([tenantId, lessonId])
 }

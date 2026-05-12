@@ -11,7 +11,11 @@
 
 model AuditLog {
   id            String   @id @default(cuid())
-  tenantId      String
+  /// Tenant the audited row belongs to; null = platform-level mutation
+  /// (AppSettings, global FeatureFlag, Skill taxonomy). Per SECURITY.md
+  /// Gate 4 every mutation produces an AuditLog row — never NULL means
+  /// "skip audit".
+  tenantId      String?
   /// User performing the action; "system" for backend jobs.
   actorUserId   String
   /// "create" | "update" | "delete" | "soft_delete" | "restore" | "auth".
@@ -31,8 +35,12 @@ model AuditLog {
   correlationId String?
   createdAt     DateTime @default(now())
 
+  /// Common tenant-feed reads: "last N audit rows for this tenant".
+  @@index([tenantId, createdAt(sort: Desc)])
+  /// Per-entity audit trail.
   @@index([tenantId, entity, entityId, createdAt])
-  @@index([actorUserId, createdAt])
+  /// Forensics: "everything actor X did across tenants".
+  @@index([actorUserId, createdAt(sort: Desc)])
 }
 
 model WebhookEvent {

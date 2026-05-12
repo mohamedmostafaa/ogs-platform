@@ -6,13 +6,19 @@
  *   - `action` — "create" | "update" | "delete" | "soft_delete".
  *   - `entity` + `entityId`.
  *   - `before` and `after` snapshots (Json).
- *   - `ipAddress`, `userAgent`, `correlationId` when provided.
+ *   - `ipAddress`, `userAgent`, `correlationId` from the actor context.
+ *
+ * **Failure policy (SECURITY.md Gate 4 — "no code path bypasses audit"):**
+ *   - Default: a failed AuditLog write **fails the originating request**.
+ *     Better a 500 than a silent loss of audit trail.
+ *   - Escape hatch: set `OGS_AUDIT_BEST_EFFORT=true` to fall back to
+ *     `console.error`. Intended only for triage of a known audit-table
+ *     incident; should never be the steady state.
  *
  * Models that are themselves bookkeeping (`AuditLog`, `WebhookEvent`,
- * `Session`, `Verification`) are excluded to prevent infinite recursion
- * and pointless noise.
+ * `Session`, `Verification`) are excluded to prevent recursion + noise.
  *
- * @see Blueprint §16.4.
+ * @see Blueprint §16.4, SECURITY.md Gate 4.
  */
 import { Prisma } from "../generated/prisma/client";
 import { getActor } from "../run-with-actor";
@@ -58,16 +64,28 @@ export const auditExtension = Prisma.defineExtension({
         }
 
         const result = await query(args);
-        await writeAuditLog(this as never, {
-          model: model!,
-          operation,
-          args,
-          result,
-        }).catch((err) => {
-          // Audit failures must NEVER break the originating request.
-          // Once @ogs/observability lands, the Sentry path swaps in here.
-          console.error("[@ogs/db][audit] failed to write audit log:", err);
-        });
+        try {
+          await writeAuditLog(this as never, {
+            model: model!,
+            operation,
+            args,
+            result,
+          });
+        } catch (err) {
+          // Gate 4: prefer to fail the originating request over silently
+          // losing the audit trail. The opt-out covers known-incident
+          // triage; never the steady state.
+          if (process.env.OGS_AUDIT_BEST_EFFORT === "true") {
+            console.error("[@ogs/db][audit] best-effort: write failed:", err);
+          } else {
+            throw new Error(
+              `[@ogs/db][audit] failed to persist audit row for ${model}.${operation} — refusing to commit silently. ` +
+                `Set OGS_AUDIT_BEST_EFFORT=true only as a temporary triage measure. Underlying: ${
+                  err instanceof Error ? err.message : String(err)
+                }`,
+            );
+          }
+        }
         return result;
       },
     },
@@ -86,10 +104,11 @@ async function writeAuditLog(
   { model, operation, args, result }: WriteAuditPayload,
 ): Promise<void> {
   const ctx = getActor();
-  // Outside of runWithActor — skip rather than spam audit rows with "system".
+  // Outside runWithActor (CLI scripts, migrations, Prisma Studio) we
+  // can't know the actor. Skip rather than fabricate. Server code paths
+  // that mutate without runWithActor are a separate bug for tenant-scope
+  // to catch.
   if (!ctx) return;
-  // Without a tenant, we can't legally write an AuditLog row — bail.
-  if (ctx.tenantId === null) return;
 
   const action = mapAction(operation, result);
   const entityId = extractEntityId(result, args);
@@ -101,12 +120,14 @@ async function writeAuditLog(
     }
   ).auditLog.create({
     data: {
+      // Platform-level writes (AppSettings, Skill, global FeatureFlag)
+      // have `tenantId: null` and now persist a null-tenant audit row.
       tenantId: ctx.tenantId,
       actorUserId: ctx.actorUserId,
       action,
       entity: model,
       entityId,
-      before: null, // before-snapshot capture is a Phase 02 follow-up.
+      before: null, // Before-snapshot capture is a Phase 02 follow-up.
       after,
       ipAddress: ctx.ipAddress ?? null,
       userAgent: ctx.userAgent ?? null,
@@ -137,7 +158,10 @@ function extractEntityId(result: unknown, args: unknown): string {
     const a = args as { where?: { id?: string } };
     if (typeof a.where?.id === "string") return a.where.id;
   }
-  return "";
+  // Batch writes (updateMany/deleteMany) return {count}; we don't know
+  // individual ids. Use a sentinel rather than empty string so feed
+  // queries can filter these out.
+  return "<batch>";
 }
 
 function isObjectLike(v: unknown): v is Record<string, unknown> {

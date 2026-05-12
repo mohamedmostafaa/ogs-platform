@@ -4,11 +4,18 @@
 // One User -> at most one Worker (1:0..1). The Worker row holds the
 // professional profile; the User row holds identity + auth state.
 //
-// @see Blueprint §5.7.
+// Every row carries `tenantId` so the tenant-scope Prisma extension can
+// auto-filter reads and auto-stamp writes (SECURITY.md Gate 6). The
+// initial provisioning helper attaches new workers to the `ogs-internal`
+// tenant (blueprint §6.6); enterprise workforce admins can later move a
+// Worker to their tenant via the Admin app.
+//
+// @see Blueprint §5.7, SECURITY.md §0 rule 6.
 // ---------------------------------------------------------------------------
 
 model Worker {
   id               String    @id @default(cuid())
+  tenantId         String
   userId           String    @unique
   /// Professional headline ("Senior Drilling Engineer — 12 yrs offshore").
   headline         String?
@@ -32,12 +39,13 @@ model Worker {
   applications JobApplication[]
   enrollments  Enrollment[]
 
-  @@index([deletedAt])
+  @@index([tenantId, deletedAt])
   @@index([locationCountry])
 }
 
 model Experience {
   id          String    @id @default(cuid())
+  tenantId    String
   workerId    String
   companyName String
   title       String
@@ -52,11 +60,12 @@ model Experience {
 
   worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
 
-  @@index([workerId, deletedAt])
+  @@index([tenantId, workerId, deletedAt])
 }
 
 model Education {
   id          String    @id @default(cuid())
+  tenantId    String
   workerId    String
   institution String
   degree      String
@@ -69,11 +78,12 @@ model Education {
 
   worker Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
 
-  @@index([workerId, deletedAt])
+  @@index([tenantId, workerId, deletedAt])
 }
 
 model Credential {
   id             String    @id @default(cuid())
+  tenantId       String
   workerId       String
   /// "certificate" | "license" | "training" | "award".
   type           String
@@ -92,6 +102,6 @@ model Credential {
   worker       Worker             @relation(fields: [workerId], references: [id], onDelete: Cascade)
   verification SkillVerification? @relation(fields: [verificationId], references: [id])
 
-  @@index([workerId, deletedAt])
+  @@index([tenantId, workerId, deletedAt])
   @@index([type])
 }

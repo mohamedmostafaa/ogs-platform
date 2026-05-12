@@ -27,18 +27,30 @@ import { getActor } from "../run-with-actor";
  * tenant-scoped. Keep this in sync with the schema files.
  */
 const NO_TENANT_MODELS = new Set<string>([
+  // Identity / auth tables — single-user-scoped, no tenant column.
   "User",
   "Account",
   "Session",
   "Verification",
+  "UserPreference",
+  // OAuth provider tables — keyed on OAuthApplication / userId.
   "OAuthApplication",
   "OAuthAccessToken",
   "OAuthConsent",
-  "UserPreference",
+  // Per-user notification preferences — keyed on userId.
+  "NotificationPreference",
+  // AI infrastructure — PromptVersion is a global registry; embedding
+  // chunks scope via their parent KnowledgeDocument's tenantId.
   "PromptVersion",
+  "EmbeddingChunk",
+  // Singleton + cross-tenant tables.
   "AppSettings",
   "WebhookEvent",
+  // Global taxonomy.
   "Skill",
+  // Tenants don't belong to themselves; memberships need cross-tenant
+  // queries (admin "all my tenants" page); FeatureFlag with tenantId
+  // null is the global default and auto-scope would hide globals.
   "Tenant",
   "Membership",
   "FeatureFlag",

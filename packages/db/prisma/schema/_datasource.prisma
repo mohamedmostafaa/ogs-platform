@@ -21,5 +21,5 @@ generator client {
 
 datasource db {
   provider   = "postgresql"
-  extensions = [pgcrypto, vector]
+  extensions = [vector]
 }
