@@ -1,15 +1,21 @@
 # pnpm 11 workspaces declaration.
 # pnpm-specific settings (catalog, hoisting, build allow-list) belong here,
 # NOT in .npmrc — see blueprint §4.7 and pnpm 11 migration notes in §3.1.1.
+#
+# `allowBuilds` is the explicit pre-approval map pnpm 11 uses in CI;
+# without it, install fails with ERR_PNPM_IGNORED_BUILDS even when the
+# package is whitelisted in `onlyBuiltDependencies`.
 packages:
   - "apps/*"
   - "packages/*"
   - "tooling/*"
-allowBuilds:
-  sharp: true
-  unrs-resolver: true
 onlyBuiltDependencies:
   - esbuild
   - inngest-cli
   - sharp
   - unrs-resolver
+allowBuilds:
+  esbuild: true
+  inngest-cli: true
+  sharp: true
+  unrs-resolver: true
