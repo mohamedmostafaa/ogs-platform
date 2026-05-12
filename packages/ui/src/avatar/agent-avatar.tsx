@@ -56,12 +56,20 @@ export function AgentAvatar({ agent, glyph, tone, size = "md", className }: Agen
       )}
     >
       <span aria-hidden>{display}</span>
+      {/*
+        AI-agent identifier pill. Per SECURITY.md (rule "AgentAvatar
+        must never be mistakable for a human user"), the pill MUST
+        have high contrast against the page background — we use
+        primary-on-primary-foreground rather than a faint outlined dot.
+        The pill is bottom-right at 30% of the avatar's diameter so
+        it's clearly visible at every size.
+      */}
       <span
         aria-hidden
-        className="bg-background ring-border absolute -right-1 -bottom-1 inline-flex h-4 w-4 items-center justify-center rounded-full ring-1"
+        className="bg-primary text-primary-foreground ring-background absolute -right-1 -bottom-1 inline-flex h-[35%] min-h-[14px] w-[35%] min-w-[14px] items-center justify-center rounded-full ring-2"
         title="AI agent"
       >
-        <Sparkles className="h-2.5 w-2.5" aria-hidden />
+        <Sparkles className="h-[60%] w-[60%]" aria-hidden />
       </span>
     </div>
   );
