@@ -82,7 +82,7 @@ EOF
       "~/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "proxy.ts"],
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", ".next"]
 }
 EOF

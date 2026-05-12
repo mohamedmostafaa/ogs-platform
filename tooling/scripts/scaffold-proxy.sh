@@ -16,8 +16,9 @@ APPS=(id careers skillpass academy eco enterprise admin corporate)
 for name in "${APPS[@]}"; do
   dir="apps/${name}"
 
-  echo "[proxy] writing ${dir}/proxy.ts"
-  cat > "${dir}/proxy.ts" <<'EOF'
+  mkdir -p "${dir}/src"
+  echo "[proxy] writing ${dir}/src/proxy.ts"
+  cat > "${dir}/src/proxy.ts" <<'EOF'
 /**
  * Next.js 16 `proxy.ts` — runs before every matched request.
  *
