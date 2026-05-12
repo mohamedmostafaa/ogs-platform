@@ -14,7 +14,10 @@
     "next": "16.2.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "@ogs/security": "workspace:*"
+    "@ogs/config": "workspace:*",
+    "@ogs/security": "workspace:*",
+    "@ogs/ui": "workspace:*",
+    "lucide-react": "^1.14.0"
   },
   "devDependencies": {
     "@ogs/eslint-config": "workspace:*",
@@ -24,6 +27,8 @@
     "@types/react-dom": "^19",
     "eslint": "^10.3.0",
     "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4.3.0",
+    "@tailwindcss/postcss": "^4.3.0",
     "typescript": "^6.0.3"
   }
 }
