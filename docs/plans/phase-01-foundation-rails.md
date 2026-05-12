@@ -93,6 +93,131 @@ For each macro task `OGS-NNN`, the expansion produces steps OGS-NNN.01 through O
 
 ---
 
+## Atomic steps — OGS-080..085 (`@ogs/api` — tRPC v11 shell)
+
+**Owner:** @api-engineer · **Reviewer:** @code-reviewer + @auth-engineer
+**Security gates touched:** Gate 1 (auth — wraps `@ogs/auth/guards`), Gate 2 (input validation — Zod), Gate 3 (authorization — protectedProcedure), Gate 4 (audit — every mutation flows through `runWithActor`).
+**Blueprint sections:** §7.1 (`trpc.ts`), §7.2 (`query-client.ts`), §7.3 (`server-helpers.tsx`), §7.4 (`client.tsx` TRPCReactProvider), §7.6 (`root.ts` appRouter).
+
+### Prerequisites verified
+
+- `@ogs/auth` exports `requireAuth`, `requireTenant`, `requireRole`, `AuthGuardError`, `actorFromSession` (Phase-A B1..B5 closed).
+- `@ogs/db` exports `prisma` (composed), `runWithActor`, `ActorContext`, `Prisma` types.
+- `pnpm version-check` GREEN with `@trpc/server@^11.17`, `@trpc/client@^11.17`, `@trpc/react-query@^11.17`, `@tanstack/react-query@^5.100`, `superjson@^2`, `zod@^4` (verified locally before this expansion).
+
+### File map
+
+| Path                                       | Purpose                                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `packages/api/package.json`                | Workspace manifest + deps                                                                                           |
+| `packages/api/tsconfig.json`               | Self-contained TS config (bundler resolution, JSX preserve)                                                         |
+| `packages/api/eslint.config.mjs`           | Extends `@ogs/eslint-config/library.js`                                                                             |
+| `packages/api/src/trpc.ts`                 | Context factory, `t = initTRPC`, base + protected procedure, error formatter                                        |
+| `packages/api/src/query-client.ts`         | QueryClient factory (superjson + 60s stale; never instantiate at module load)                                       |
+| `packages/api/src/server-helpers.tsx`      | `getQueryClient`, `createCaller`, `HydrateClient` server component                                                  |
+| `packages/api/src/client.tsx`              | `TRPCReactProvider` (browser) + `trpc` typed React hooks                                                            |
+| `packages/api/src/root.ts`                 | Empty `appRouter` + `export type AppRouter = typeof appRouter`                                                      |
+| `packages/api/src/context.ts`              | `createTRPCContext({ headers, info })` — reads session, builds ActorContext, opens `runWithActor` scope per request |
+| `packages/api/src/index.ts`                | Root barrel: `appRouter`, `AppRouter`, `createTRPCContext`                                                          |
+| `apps/id/src/app/api/trpc/[trpc]/route.ts` | Next.js Route Handler wiring `fetchRequestHandler`                                                                  |
+| `apps/id/src/lib/trpc.ts`                  | Per-app browser tRPC client instance                                                                                |
+
+### OGS-080.01 — workspace scaffold
+
+- [ ] Create `packages/api/{package.json, tsconfig.json, eslint.config.mjs}`.
+- [ ] `package.json` deps: `@ogs/auth workspace:*`, `@ogs/config workspace:*`, `@ogs/db workspace:*`, `@trpc/server@^11.17`, `@trpc/client@^11.17`, `@trpc/react-query@^11.17`, `@tanstack/react-query@^5.100`, `superjson@^2.2.6`, `zod@^4.0.0`.
+- [ ] `pnpm install` — postinstall regenerates Prisma client, no other side effects.
+- [ ] Run `pnpm --filter @ogs/api typecheck` — expect PASS (empty package).
+
+### OGS-081.01 — `trpc.ts` context + procedures
+
+- [ ] Write `src/context.ts` exporting `createTRPCContext({ headers })`. It calls `auth.api.getSession({ headers })`, returns `{ headers, session, ipAddress, userAgent, correlationId }`.
+- [ ] Write `src/trpc.ts`:
+  - `import { initTRPC, TRPCError } from "@trpc/server"`.
+  - `import superjson from "superjson"`.
+  - `import { ZodError } from "zod"`.
+  - `import { AuthGuardError } from "@ogs/auth/guards"`.
+  - `const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create({ transformer: superjson, errorFormatter: ... })`.
+  - `errorFormatter` maps `AuthGuardError` codes → TRPC codes (UNAUTHENTICATED→UNAUTHORIZED, FORBIDDEN→FORBIDDEN, TENANT_MISMATCH→FORBIDDEN, FEATURE_DISABLED→FORBIDDEN) and unwraps `ZodError` into `flattened` shape.
+  - `export const router = t.router`.
+  - `export const publicProcedure = t.procedure`.
+  - `export const protectedProcedure = t.procedure.use(async ({ ctx, next }) => { if (!ctx.session) throw new TRPCError({ code: "UNAUTHORIZED" }); return next({ ctx: { ...ctx, session: ctx.session } }); })`.
+- [ ] `pnpm typecheck` PASS.
+
+### OGS-081.02 — wire `runWithActor` middleware
+
+- [ ] Add `tenantProcedure` factory: `protectedProcedure.use(async ({ ctx, next, input }) => { ... runWithActor({ tenantId, actorUserId, ipAddress, userAgent }, () => next({ ctx: { ...ctx, tenantId } })); })`. tenantId source: explicit input arg OR `OGS_TENANT_HEADER` ("x-ogs-tenant-slug") — caller's responsibility.
+- [ ] Document in JSDoc: every mutation should be a `tenantProcedure` so audit fires.
+
+### OGS-082.01 — `query-client.ts`
+
+- [ ] Export `makeQueryClient()` returning `new QueryClient({ defaultOptions: { queries: { staleTime: 60_000 }, dehydrate: { serializeData: superjson.serialize }, hydrate: { deserializeData: superjson.deserialize } } })`.
+- [ ] Memoise per-process via a `globalThis.__ogsQC` cache so the server prefetch and the client share a serialised state shape.
+
+### OGS-083.01 — `server-helpers.tsx`
+
+- [ ] Export `getQueryClient()` (cached per request via `cache()` from `react`).
+- [ ] Export `createCaller()` — server-side direct invocation: `appRouter.createCaller(await createTRPCContext({ headers: await headers() }))`.
+- [ ] Export `HydrateClient` server component wrapping `<HydrationBoundary state={dehydrate(getQueryClient())}>`.
+
+### OGS-084.01 — `client.tsx` TRPCReactProvider
+
+- [ ] Export `trpc = createTRPCReact<AppRouter>()`.
+- [ ] Export `TRPCReactProvider` client component: builds `trpcClient` with `httpBatchLink({ url, transformer: superjson })`, wraps children in `<QueryClientProvider>` + `<trpc.Provider>`.
+- [ ] Reads `NEXT_PUBLIC_TRPC_URL` first, falls back to relative `/api/trpc` (works for same-origin SSR).
+
+### OGS-085.01 — empty `root.ts`
+
+- [ ] Export `appRouter = router({})` and `export type AppRouter = typeof appRouter`.
+- [ ] First real procedure lands in Phase 02 (`identity.me` — read-only session inspector).
+
+### OGS-085.02 — mount `/api/trpc/[trpc]` route in apps/id
+
+- [ ] Create `apps/id/src/app/api/trpc/[trpc]/route.ts`:
+  - `import { fetchRequestHandler } from "@trpc/server/adapters/fetch"`.
+  - Export `GET`/`POST` calling `fetchRequestHandler({ endpoint: "/api/trpc", req, router: appRouter, createContext: ({ req }) => createTRPCContext({ headers: req.headers }) })`.
+  - `export const dynamic = "force-dynamic"` (same as `/api/auth/[...all]`).
+- [ ] Create `apps/id/src/lib/trpc.ts` re-exporting the browser client.
+
+### Verification gates (must all PASS before commit)
+
+- [ ] `pnpm version-check` → 66 green, 0 yellow.
+- [ ] `pnpm turbo typecheck` → all packages green (now 14 + 8 apps).
+- [ ] `pnpm turbo build` → 8/8 apps green, `apps/id` lists `/api/trpc/[trpc]` as `ƒ Dynamic`.
+- [ ] `pnpm turbo lint` → 14/14 green.
+- [ ] `pnpm format:check` → clean.
+- [ ] Smoke: `curl -X POST http://localhost:3000/api/trpc/health.ping` returns either 404 (no procedures yet — expected) or 200. We only assert the route mount works, NOT a procedure response.
+- [ ] `gitleaks detect --no-banner --exit-code 1` → 0 leaks.
+
+### Commit body template
+
+```
+feat(api): @ogs/api — tRPC v11 shell with auth-aware procedures (OGS-080..085)
+
+What lands:
+- packages/api/* — context, trpc.ts, query-client.ts, server-helpers.tsx,
+  client.tsx, root.ts. Empty appRouter; first procedure in Phase 02.
+- apps/id mounts /api/trpc/[trpc] route handler.
+- All mutations should use `tenantProcedure` so runWithActor fires and
+  audit Gate 4 holds.
+
+SECURITY.md gate walk:
+- Gate 1 (auth): protectedProcedure throws UNAUTHORIZED via TRPCError on
+  missing session.
+- Gate 2 (input validation): every public procedure declares a Zod input;
+  errorFormatter unwraps ZodError into typed field errors.
+- Gate 3 (authorization): tenantProcedure composes requireTenant; role
+  gates use requireRole(slug, role) from @ogs/auth/guards.
+- Gate 4 (audit): tenantProcedure wraps next() in runWithActor so the
+  audit extension fires on every mutation it routes.
+- Gates 5–10: not touched by this shell.
+
+Verified locally: turbo typecheck/build/lint/format:check + version-check
++ gitleaks all clean.
+
+Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+```
+
 ## Done
 
 (Move completed tasks here.)
