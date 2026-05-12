@@ -23,7 +23,7 @@
     "db:studio": "pnpm --filter @ogs/db prisma:studio",
     "inngest:dev": "inngest-cli dev",
     "version-check": "tsx tooling/scripts/version-check.ts",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@ogs/eslint-config": "workspace:*",
