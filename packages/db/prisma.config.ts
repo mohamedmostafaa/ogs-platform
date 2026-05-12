@@ -24,15 +24,20 @@ loadDotenv();
 // DIRECT_URL may be present-but-empty (an unfilled placeholder); fall
 // back to DATABASE_URL in that case. `??` does not handle the empty
 // string, so we explicitly coerce to undefined first.
-const directUrl =
+//
+// `prisma generate` does NOT connect to the database — it only reads
+// the schema. So we use a sentinel placeholder URL when nothing is
+// set, which lets CI run `prisma generate` without `.env.local`.
+// `prisma migrate dev` / `prisma studio` will fail loudly when the
+// sentinel hits real database I/O — that's the right failure shape.
+const resolvedUrl =
   (process.env.DIRECT_URL && process.env.DIRECT_URL.length > 0
     ? process.env.DIRECT_URL
     : undefined) ?? process.env.DATABASE_URL;
-
-if (!directUrl) {
-  // Migrations + studio cannot work without a connection — fail fast.
-  throw new Error("[prisma.config] DATABASE_URL (or DIRECT_URL) must be set.");
-}
+const directUrl =
+  resolvedUrl && resolvedUrl.length > 0
+    ? resolvedUrl
+    : "postgresql://generate-only-no-db@localhost:5432/placeholder";
 
 export default defineConfig({
   schema: "prisma/schema",
