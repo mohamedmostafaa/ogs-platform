@@ -42,9 +42,16 @@ jobs:
           # The exclusion paths keep the blueprint, security charter, and code-reviewer
           # checklist out of the scan, since they intentionally name these patterns
           # to warn against them.
+          # grep returns exit 1 when zero lines match. Under `set -e -o
+          # pipefail` (the default for `shell: bash` in Actions) that
+          # would kill the whole script — including the legitimate
+          # "empty commit / docs-only PR" case. Disable pipefail just
+          # for this command-substitution.
+          set +o pipefail
           ADDED=$(git diff "$BASE" "$HEAD" -- 'apps/**' 'packages/**' \
                   ':!packages/db/prisma/schema/**' \
-                  | grep -E '^\+' | grep -v '^\+\+\+' | sed 's/^\+//')
+                  | grep -E '^\+' | grep -v '^\+\+\+' | sed 's/^\+//' || true)
+          set -o pipefail
 
           # Parallel-array dispatch so attribution is deterministic regardless of
           # bash version's associative-array iteration order. Each PATTERNS[i]

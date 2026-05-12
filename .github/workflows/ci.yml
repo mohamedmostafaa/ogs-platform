@@ -12,6 +12,10 @@ concurrency:
 # Shared steps for every job — pnpm/action-setup@v4 reads pnpm version
 # from package.json's `packageManager` field, so do NOT pass `version:`
 # alongside it (the action treats that as a conflict and fails the job).
+#
+# Every job that runs typecheck/build/lint MUST run `pnpm db:generate`
+# first — the generated Prisma client lives in `packages/db/src/generated/`
+# which is gitignored, so a fresh checkout has no types.
 
 jobs:
   lint:
@@ -25,6 +29,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
       - run: pnpm lint
       - run: pnpm format:check
 
@@ -40,6 +45,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
       - run: pnpm typecheck
 
   test:
@@ -54,6 +60,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
       - run: pnpm test
 
   build:
@@ -68,4 +75,5 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
       - run: pnpm build
