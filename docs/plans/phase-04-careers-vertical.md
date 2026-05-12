@@ -45,6 +45,6 @@ Verifies the canonical exit criterion above and all Wave-1 security gates remain
 
 ## Mandatory Arcjet tasks (added v2)
 
-- OGS-247  Apply Arcjet `publicForm` on `apps/web-careers/src/app/(public)/apply/[slug]/page.tsx` (Flow K). Reject disposable-email applicants; rate-limit signups to 5 / 10 min / IP. See `SECURITY.md` §6.2.
-- OGS-248  Apply Arcjet `mutation` token-bucket inside the `application.create` tRPC procedure (per-user) as defense in depth on top of the middleware. See `SECURITY.md` §6.4.
-- OGS-249  Apply Arcjet `mutation` on `cv-upload-parsing` upload-presign tRPC procedure so CV-upload abuse is rate-limited per user. See `SECURITY.md` §6.4.
+- OGS-247 Apply Arcjet `publicForm` on `apps/web-careers/src/app/(public)/apply/[slug]/page.tsx` (Flow K). Reject disposable-email applicants; rate-limit signups to 5 / 10 min / IP. See `SECURITY.md` §6.2.
+- OGS-248 Apply Arcjet `mutation` token-bucket inside the `application.create` tRPC procedure (per-user) as defense in depth on top of the middleware. See `SECURITY.md` §6.4.
+- OGS-249 Apply Arcjet `mutation` on `cv-upload-parsing` upload-presign tRPC procedure so CV-upload abuse is rate-limited per user. See `SECURITY.md` §6.4.

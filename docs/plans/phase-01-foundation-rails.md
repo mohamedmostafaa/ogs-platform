@@ -6,6 +6,7 @@
 **Goal.** Stand up `@ogs/config`, `@ogs/db` (with three Prisma extensions), `@ogs/auth` (shell), `@ogs/api` (shell), and `@ogs/ui` (full primitives + EntityX + Avatar + theme). `pnpm build` green; the stub `apps/web-id` renders the OGS logo and a sign-in button placeholder served from the @ogs/ui primitive set.
 
 **Exit criterion.**
+
 1. `pnpm --filter @ogs/db prisma:migrate dev` succeeds and produces the 15-file schema with a working dev branch.
 2. The composed Prisma client exports `prisma` that, when used inside `runWithActor({ tenantId, actorUserId })`, automatically applies soft-delete, tenant-scope, and audit on writes — verified by three integration tests.
 3. `@ogs/ui` exports the full shadcn primitive set; a Storybook-or-route smoke renders `UserAvatar`, `AgentAvatar`, `EntityHeader`, `EntityList`, `EntityPagination`, `EntityEmptyView`, `DataTable`.

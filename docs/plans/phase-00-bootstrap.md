@@ -7,6 +7,7 @@
 **Goal.** Stand up the OGS monorepo so `pnpm dev` brings up all eight Next.js apps + the Inngest worker + Inngest dev server + Prisma Studio in one terminal, with every app rendering an empty hello-world home page on its preview URL.
 
 **Exit criterion.**
+
 1. CI is green on `main`.
 2. The eight web apps deploy via Vercel previews; each preview URL renders the OGS logo.
 3. `pnpm db:generate && pnpm db:migrate` succeeds against a Neon dev branch with `pgvector` enabled.
@@ -215,12 +216,15 @@ export default [
     rules: {
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "warn",
-      "import/order": ["warn", {
-        "newlines-between": "always",
-        groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
-        pathGroups: [{ pattern: "@ogs/**", group: "internal", position: "before" }],
-        alphabetize: { order: "asc", caseInsensitive: true },
-      }],
+      "import/order": [
+        "warn",
+        {
+          "newlines-between": "always",
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+          pathGroups: [{ pattern: "@ogs/**", group: "internal", position: "before" }],
+          alphabetize: { order: "asc", caseInsensitive: true },
+        },
+      ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
@@ -588,8 +592,8 @@ jobs:
 ```md
 # ADR Index
 
-| # | Title | Status | Date | PR |
-|---|---|---|---|---|
+| #   | Title | Status | Date | PR  |
+| --- | ----- | ------ | ---- | --- |
 
 (no ADRs yet)
 ```
@@ -682,7 +686,11 @@ jobs:
   "rangeStrategy": "bump",
   "packageRules": [
     { "matchUpdateTypes": ["major"], "enabled": false },
-    { "matchUpdateTypes": ["minor", "patch"], "groupName": "minor + patch", "groupSlug": "minor-patch" }
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "minor + patch",
+      "groupSlug": "minor-patch"
+    }
   ],
   "minimumReleaseAge": "1 day",
   "vulnerabilityAlerts": { "enabled": true, "labels": ["security"] }

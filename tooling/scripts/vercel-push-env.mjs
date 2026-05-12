@@ -83,19 +83,22 @@ for (const app of APPS) {
       }
     } else {
       // POST new env.
-      const r = await fetch(`https://api.vercel.com/v10/projects/${projectId}/env?teamId=${teamId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${VERCEL_TOKEN}`,
-          "Content-Type": "application/json",
+      const r = await fetch(
+        `https://api.vercel.com/v10/projects/${projectId}/env?teamId=${teamId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${VERCEL_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            key,
+            value,
+            type: "encrypted",
+            target: ["production", "preview", "development"],
+          }),
         },
-        body: JSON.stringify({
-          key,
-          value,
-          type: "encrypted",
-          target: ["production", "preview", "development"],
-        }),
-      });
+      );
       if (r.ok) created++;
       else {
         failed++;

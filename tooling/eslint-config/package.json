@@ -9,7 +9,10 @@
     "./library.js": "./library.js",
     "./next.js": "./next.js"
   },
-  "files": ["library.js", "next.js"],
+  "files": [
+    "library.js",
+    "next.js"
+  ],
   "peerDependencies": {
     "eslint": "^10",
     "@typescript-eslint/parser": "^8",

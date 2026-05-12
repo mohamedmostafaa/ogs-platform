@@ -49,17 +49,17 @@ The blueprint Chapters 4 and 5 define the canonical layout. Two patterns dominat
 
 ### 1.3 Naming
 
-| Thing | Convention | Example |
-|---|---|---|
-| Files | kebab-case | `use-jobs.ts`, `job-form.tsx` |
-| Folders | kebab-case | `worker-profile/`, `cv-upload-parsing/` |
-| Components | PascalCase | `JobsList`, `EntityHeader` |
-| Hooks | camelCase, `use*` | `useSuspenseJobs`, `useErrorModal` |
-| Types | PascalCase | `JobGetOne`, `WorkerAvailability` |
-| Constants | UPPER_SNAKE_CASE | `DEFAULT_PAGE`, `MAX_PAGE_SIZE` |
-| Enums | UPPER_SNAKE_CASE for members | `ApplicationStage.APPLIED` |
-| Booleans | `is*`, `has*`, `can*`, `should*` | `isLoading`, `hasActiveSubscription` |
-| Async functions | verb phrase | `loadWorkerProfile`, `sendOTPEmail` |
+| Thing           | Convention                       | Example                                 |
+| --------------- | -------------------------------- | --------------------------------------- |
+| Files           | kebab-case                       | `use-jobs.ts`, `job-form.tsx`           |
+| Folders         | kebab-case                       | `worker-profile/`, `cv-upload-parsing/` |
+| Components      | PascalCase                       | `JobsList`, `EntityHeader`              |
+| Hooks           | camelCase, `use*`                | `useSuspenseJobs`, `useErrorModal`      |
+| Types           | PascalCase                       | `JobGetOne`, `WorkerAvailability`       |
+| Constants       | UPPER_SNAKE_CASE                 | `DEFAULT_PAGE`, `MAX_PAGE_SIZE`         |
+| Enums           | UPPER_SNAKE_CASE for members     | `ApplicationStage.APPLIED`              |
+| Booleans        | `is*`, `has*`, `can*`, `should*` | `isLoading`, `hasActiveSubscription`    |
+| Async functions | verb phrase                      | `loadWorkerProfile`, `sendOTPEmail`     |
 
 ## 2. Commenting standard
 
@@ -84,7 +84,11 @@ Every exported function, class, type, hook, and React component in `packages/**`
  *
  * @see Blueprint §11.1
  */
-export async function presignUpload(args: { key: string; contentType: string; contentLength: number }) {
+export async function presignUpload(args: {
+  key: string;
+  contentType: string;
+  contentLength: number;
+}) {
   // ...
 }
 ```
@@ -154,7 +158,11 @@ Throw on truly exceptional. Return a tagged result for expected failure paths.
 
 ```ts
 // Bad
-try { return await load(); } catch { return null; }
+try {
+  return await load();
+} catch {
+  return null;
+}
 
 // Good
 const result = await loadOr(null);

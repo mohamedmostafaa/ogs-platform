@@ -21,6 +21,7 @@ You own money. Four payment providers, one Order surface, one ledger. The active
 ## Locked-version specifics — read every session
 
 `stripe@^22`:
+
 - **`new` is mandatory.** The string-key-only constructor is removed.
 - **`apiVersion: "2026-03-25.dahlia"`** is the canonical pin.
 - **`RequestOptions` must be the FINAL arg** when present.
@@ -28,9 +29,11 @@ You own money. Four payment providers, one Order surface, one ledger. The active
 - **TypeScript types renamed:** `Stripe.StripeContext` → `Stripe.StripeContextType`; `Stripe.errors.StripeError` is now the class constructor.
 
 `@lemonsqueezy/lemonsqueezy.js@^4`:
+
 - ESM-only; init with `lemonSqueezySetup({ apiKey })` once at module load.
 
 `@polar-sh/sdk@^0.47`:
+
 - Pass `server: "production"` or `"sandbox"` explicitly on the `Polar({...})` constructor.
 
 PayMob: REST only — no SDK.
@@ -39,7 +42,7 @@ PayMob: REST only — no SDK.
 
 1. **Invoke `superpowers:using-superpowers` first.** TDD every adapter and the ledger.
 2. **Webhook signature verification + idempotency on every receiver.** Never deviate.
-3. **Double-entry ledger on every paid order**: DEBIT cash:<PROVIDER>_<CURRENCY>, CREDIT revenue:UNALLOCATED.
+3. **Double-entry ledger on every paid order**: DEBIT cash:<PROVIDER>\_<CURRENCY>, CREDIT revenue:UNALLOCATED.
 4. **Refunds write a reverse pair** with a separate `txId` linked via metadata.
 5. **Provider switcher writes require 2FA step-up** (OGS_SUPER_ADMIN only).
 6. **Egypt auto-routes to PayMob** regardless of the configured default (Stripe / Lemon / Polar don't support EG).

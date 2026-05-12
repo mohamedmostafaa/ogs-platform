@@ -45,8 +45,8 @@ Verifies the canonical exit criterion above and all Wave-1 security gates remain
 
 ## Mandatory Arcjet tasks (added v2)
 
-- OGS-425  Wrap every `runAITask`-consuming tRPC procedure with the in-handler Arcjet `aiEndpoint` token bucket (`refillRate: 10`, `interval: 1m`, `capacity: 20`). The middleware-level limit stays; this is defense in depth aligned to the per-MAU AI cost budget. See `SECURITY.md` §6.4.
-- OGS-426  Apply the same `aiEndpoint` rule set to AI-consuming Inngest function steps via an Arcjet decision on the originating user id stored on the event payload.
+- OGS-425 Wrap every `runAITask`-consuming tRPC procedure with the in-handler Arcjet `aiEndpoint` token bucket (`refillRate: 10`, `interval: 1m`, `capacity: 20`). The middleware-level limit stays; this is defense in depth aligned to the per-MAU AI cost budget. See `SECURITY.md` §6.4.
+- OGS-426 Apply the same `aiEndpoint` rule set to AI-consuming Inngest function steps via an Arcjet decision on the originating user id stored on the event payload.
 
 ## stream-chat-react v14 migration notes
 

@@ -19,6 +19,7 @@
 ### Task <OGS-NNN>: <Component Name>
 
 **Files:**
+
 - Create: `exact/path/to/file.ts`
 - Modify: `exact/path/to/existing.ts:line-range`
 - Test: `tests/exact/path/to/test.ts`

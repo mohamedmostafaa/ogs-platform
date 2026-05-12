@@ -26,49 +26,59 @@ Every agent reads and confirms understanding of this section at the start of eve
 These checks are gates on every PR. A failed gate is grounds for immediate rejection by the Code Reviewer agent and a re-route to the Security Engineer agent.
 
 ### Gate 1 — Authorization
+
 - [ ] Every new procedure uses the correct base procedure (table in §0 rule 2).
 - [ ] Every authorization decision is justified by membership/role/tenant checks against the active session.
 - [ ] Object-level authorization: `where: { id, tenantId }` (or equivalent) on every query that returns or mutates a tenant-scoped record.
 
 ### Gate 2 — Input validation
+
 - [ ] Every procedure input is a Zod schema imported from `modules/<x>/schema.ts`.
 - [ ] Free-text fields have max-length bounds.
 - [ ] Enums use `z.enum`, never `z.string` with a runtime check.
 - [ ] Numeric fields have `min` / `max`.
 
 ### Gate 3 — Output minimization
+
 - [ ] Procedures return the minimum fields needed by the caller. Use `select:` in Prisma.
 - [ ] Never return password hashes, raw OTP values, encryption ciphertext, or full tokens.
 - [ ] Never return another tenant's data.
 
 ### Gate 4 — Audit log
+
 - [ ] Sensitive writes produce `AuditLog` rows via the extension. No manual writes.
 - [ ] The extension's `AUDITED_MODELS` set includes any newly added sensitive table in the same PR.
 
 ### Gate 5 — Soft delete
+
 - [ ] New domain tables have `deletedAt DateTime?`.
 - [ ] The `softDeleteExtension`'s `SOFT_DELETE_MODELS` set includes them in the same PR.
 
 ### Gate 6 — Multi-tenancy
+
 - [ ] New tenant-scoped tables have `tenantId String` indexed.
 - [ ] The `tenantScopeExtension`'s `TENANT_SCOPED` set includes them in the same PR.
 
 ### Gate 7 — Webhooks
+
 - [ ] Signature verification implemented and tested with a known-good and known-bad signature.
 - [ ] `WebhookEvent` idempotency record created before any side-effect.
 - [ ] No side-effect runs more than once for the same provider eventId.
 
 ### Gate 8 — Secrets
+
 - [ ] No `.env*` file in the diff.
 - [ ] No literal API key, secret, password, or signing key in code.
 - [ ] New per-tenant secret stored via `storeSecret(...)` into `SecretCredential`, not an env var.
 
 ### Gate 9 — Logging and telemetry
+
 - [ ] No `console.log` of an entire request body.
 - [ ] PII scrubbed from Sentry events via `beforeSend`.
 - [ ] AI calls produce one `AIInteraction` row (telemetry, not PII).
 
 ### Gate 10 — Dependency hygiene
+
 - [ ] New dependency is on the locked stack (blueprint §3) or an ADR is linked.
 - [ ] Dependency is the canonical owned wrapper (Nodemailer SMTP for email, `@ogs/ai/runtime` for AI, `@ogs/payments` for payments, `@ogs/live-video` for live, `@ogs/video` for VOD).
 
@@ -76,30 +86,31 @@ These checks are gates on every PR. A failed gate is grounds for immediate rejec
 
 The threats the team designs against, in priority order:
 
-| # | Threat | Mitigation owner | Canonical controls |
-|---|---|---|---|
-| T1 | Cross-tenant data leakage | Database Engineer + Security Engineer | Prisma `tenantScopeExtension`; integration test "cross-tenant read returns 404"; tRPC `tenantProcedure` |
-| T2 | Hard delete of audit-relevant records | Database Engineer | `softDeleteExtension`; pre-commit guard in CI |
-| T3 | Unauthorized escalation to admin | Auth Engineer + Security Engineer | `OGS_*` role gate in `apps/web-admin/proxy.ts`; 2FA mandatory; quarterly access review |
-| T4 | Stripe / Lemon / Polar / PayMob webhook replay | Payments Engineer | Signature verification + `WebhookEvent` idempotency |
-| T5 | API key leakage via repo or logs | Security Engineer + DevOps Engineer | gitleaks, `.gitignore`, `beforeSend` Sentry scrub, secret-store envelope |
-| T6 | Prompt injection extracting cross-user data | AI Engineer | Guardrails on every output; RAG tenant scoping in queries |
-| T7 | Account takeover via OTP brute force | Auth Engineer | OTP max 5 attempts, 10-minute window, per-email + per-IP rate limit |
-| T8 | XSS via user-supplied content (job description, course body) | UI Engineer + Frontend Feature Engineer | React's default escaping; HTML sanitiser on any `dangerouslySetInnerHTML` (forbidden by default) |
-| T9 | CSRF on state-changing routes | Auth Engineer | Better Auth's built-in CSRF; same-site cookies; tRPC mutations require session |
-| T10 | Stolen session reuse | Auth Engineer | 1-hour product-app cookie; 30-day refresh on hub; revoke-all on password reset or 2FA change |
-| T11 | Compromised dev laptop | DevOps Engineer + Security Engineer | No prod creds on laptops; preview env only; mandatory FDE; SSH key on hardware |
-| T12 | Supply-chain compromise | Architecture Reviewer + DevOps Engineer | Locked stack; renovate with manual review of major bumps; npm audit in CI |
-| T13 | Customer-paid live video recording leak | Live Video Engineer | Signed playback URLs (Bunny + Stream); per-tenant access control; AuditLog of every view |
-| T14 | Proctoring evidence tampering | Live Video Engineer + Security Engineer | Append-only `AssessmentAttempt.proctoringEvidenceUrl`; R2 object lock in W2 |
-| T15 | Bulk PII export by a curious staff member | Security Engineer | OGS staff queries audited; download size threshold triggers alert; quarterly review |
-| T16 | Volumetric / L7 abuse on public routes (scraping, DDoS, credential stuffing) | Security Engineer + DevOps Engineer | Arcjet Shield + bot detection + rate limiting on every app proxy.ts (§6) |
-| T17 | Disposable-email signup floods (fake Workers, AI quota abuse) | Security Engineer + Auth Engineer | Arcjet `protectSignup` + email validation on Flow K and OTP routes (§6) |
-| T18 | AI cost spike from a single malicious or buggy client | AI Engineer + Security Engineer | Arcjet `tokenBucket` on AI endpoints (§6.4) + per-tenant USD 200/day Sentry alert |
+| #   | Threat                                                                       | Mitigation owner                        | Canonical controls                                                                                      |
+| --- | ---------------------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| T1  | Cross-tenant data leakage                                                    | Database Engineer + Security Engineer   | Prisma `tenantScopeExtension`; integration test "cross-tenant read returns 404"; tRPC `tenantProcedure` |
+| T2  | Hard delete of audit-relevant records                                        | Database Engineer                       | `softDeleteExtension`; pre-commit guard in CI                                                           |
+| T3  | Unauthorized escalation to admin                                             | Auth Engineer + Security Engineer       | `OGS_*` role gate in `apps/web-admin/proxy.ts`; 2FA mandatory; quarterly access review                  |
+| T4  | Stripe / Lemon / Polar / PayMob webhook replay                               | Payments Engineer                       | Signature verification + `WebhookEvent` idempotency                                                     |
+| T5  | API key leakage via repo or logs                                             | Security Engineer + DevOps Engineer     | gitleaks, `.gitignore`, `beforeSend` Sentry scrub, secret-store envelope                                |
+| T6  | Prompt injection extracting cross-user data                                  | AI Engineer                             | Guardrails on every output; RAG tenant scoping in queries                                               |
+| T7  | Account takeover via OTP brute force                                         | Auth Engineer                           | OTP max 5 attempts, 10-minute window, per-email + per-IP rate limit                                     |
+| T8  | XSS via user-supplied content (job description, course body)                 | UI Engineer + Frontend Feature Engineer | React's default escaping; HTML sanitiser on any `dangerouslySetInnerHTML` (forbidden by default)        |
+| T9  | CSRF on state-changing routes                                                | Auth Engineer                           | Better Auth's built-in CSRF; same-site cookies; tRPC mutations require session                          |
+| T10 | Stolen session reuse                                                         | Auth Engineer                           | 1-hour product-app cookie; 30-day refresh on hub; revoke-all on password reset or 2FA change            |
+| T11 | Compromised dev laptop                                                       | DevOps Engineer + Security Engineer     | No prod creds on laptops; preview env only; mandatory FDE; SSH key on hardware                          |
+| T12 | Supply-chain compromise                                                      | Architecture Reviewer + DevOps Engineer | Locked stack; renovate with manual review of major bumps; npm audit in CI                               |
+| T13 | Customer-paid live video recording leak                                      | Live Video Engineer                     | Signed playback URLs (Bunny + Stream); per-tenant access control; AuditLog of every view                |
+| T14 | Proctoring evidence tampering                                                | Live Video Engineer + Security Engineer | Append-only `AssessmentAttempt.proctoringEvidenceUrl`; R2 object lock in W2                             |
+| T15 | Bulk PII export by a curious staff member                                    | Security Engineer                       | OGS staff queries audited; download size threshold triggers alert; quarterly review                     |
+| T16 | Volumetric / L7 abuse on public routes (scraping, DDoS, credential stuffing) | Security Engineer + DevOps Engineer     | Arcjet Shield + bot detection + rate limiting on every app proxy.ts (§6)                                |
+| T17 | Disposable-email signup floods (fake Workers, AI quota abuse)                | Security Engineer + Auth Engineer       | Arcjet `protectSignup` + email validation on Flow K and OTP routes (§6)                                 |
+| T18 | AI cost spike from a single malicious or buggy client                        | AI Engineer + Security Engineer         | Arcjet `tokenBucket` on AI endpoints (§6.4) + per-tenant USD 200/day Sentry alert                       |
 
 ## 3. Required security training (per agent, every quarter)
 
 Every agent reviews:
+
 - This file.
 - Blueprint Chapter 6 (auth), 15 (encryption), 16 (Prisma extensions), 20 (webhooks), 23.9 (review checklist).
 - The OWASP Top 10 in its current published year.
@@ -128,12 +139,12 @@ Each incident produces a post-mortem in `docs/incidents/YYYY-MM-DD-<slug>.md` wi
 
 Arcjet provides four protections OGS depends on. None of them are optional.
 
-| Protection | Where applied | Why |
-|---|---|---|
-| **Shield (WAF)** | Every Next.js app proxy.ts, every route | Blocks common attacks (SQLi attempts, traversal, suspicious payloads) before they reach our code. |
-| **Bot detection** | Public routes (`/jobs`, `/apply/[slug]`, `/p/[slug]`, marketing, course catalog) | Stops scrapers, credential stuffers, and automated form-fill abuse on Flow K (Sara). |
-| **Rate limiting (token bucket + fixed window)** | Auth endpoints, AI-consuming procedures, mutation procedures | Caps OTP brute-force (T7), AI cost runaway (R-03), and abusive write traffic. |
-| **Email / sensitive-info validation** | Public signup + Flow K apply | Rejects disposable / no-MX / known-spammer emails on first-touch. |
+| Protection                                      | Where applied                                                                    | Why                                                                                               |
+| ----------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Shield (WAF)**                                | Every Next.js app proxy.ts, every route                                          | Blocks common attacks (SQLi attempts, traversal, suspicious payloads) before they reach our code. |
+| **Bot detection**                               | Public routes (`/jobs`, `/apply/[slug]`, `/p/[slug]`, marketing, course catalog) | Stops scrapers, credential stuffers, and automated form-fill abuse on Flow K (Sara).              |
+| **Rate limiting (token bucket + fixed window)** | Auth endpoints, AI-consuming procedures, mutation procedures                     | Caps OTP brute-force (T7), AI cost runaway (R-03), and abusive write traffic.                     |
+| **Email / sensitive-info validation**           | Public signup + Flow K apply                                                     | Rejects disposable / no-MX / known-spammer emails on first-touch.                                 |
 
 ### 6.1 Required package
 
@@ -223,8 +234,8 @@ export const authEndpoint = arcjet({
   rules: [
     shield({ mode: "LIVE" }),
     detectBot({ mode: "LIVE", allow: [] }),
-    fixedWindow({ mode: "LIVE", window: "1m", max: 10 }),    // 10 req / min / actor
-    fixedWindow({ mode: "LIVE", window: "10m", max: 30 }),   // 30 req / 10 min / actor
+    fixedWindow({ mode: "LIVE", window: "1m", max: 10 }), // 10 req / min / actor
+    fixedWindow({ mode: "LIVE", window: "10m", max: 30 }), // 30 req / 10 min / actor
   ],
 });
 
@@ -238,9 +249,9 @@ export const mutation = arcjet({
     shield({ mode: "LIVE" }),
     tokenBucket({
       mode: "LIVE",
-      refillRate: 30,          // tokens per interval
+      refillRate: 30, // tokens per interval
       interval: "1m",
-      capacity: 60,            // burst
+      capacity: 60, // burst
     }),
   ],
 });
@@ -255,7 +266,7 @@ export const aiEndpoint = arcjet({
     shield({ mode: "LIVE" }),
     tokenBucket({
       mode: "LIVE",
-      refillRate: 10,          // 10 AI calls / minute / user, burst 20
+      refillRate: 10, // 10 AI calls / minute / user, burst 20
       interval: "1m",
       capacity: 20,
     }),
@@ -289,12 +300,7 @@ File: `apps/web-careers/src/proxy.ts` — example.
  */
 import { NextResponse, type NextRequest } from "next/server";
 import * as Sentry from "@sentry/nextjs";
-import {
-  publicShield,
-  publicForm,
-  authEndpoint,
-  mutation,
-} from "@ogs/security/arcjet";
+import { publicShield, publicForm, authEndpoint, mutation } from "@ogs/security/arcjet";
 
 const FAIL_CLOSED_PATHS = [/^\/api\/auth\//, /^\/api\/trpc\//];
 
@@ -303,7 +309,7 @@ function shouldFailClosed(path: string): boolean {
 }
 
 function pickClient(path: string) {
-  if (path.startsWith("/apply/"))    return publicForm;
+  if (path.startsWith("/apply/")) return publicForm;
   if (path.startsWith("/api/auth/")) return authEndpoint;
   if (path.startsWith("/api/trpc/")) return mutation;
   return publicShield;
@@ -323,7 +329,10 @@ export async function proxy(req: NextRequest) {
         return NextResponse.json({ error: "BOT_BLOCKED" }, { status: 403 });
       }
       if (decision.reason.isEmail()) {
-        return NextResponse.json({ error: "EMAIL_REJECTED", detail: decision.reason }, { status: 400 });
+        return NextResponse.json(
+          { error: "EMAIL_REJECTED", detail: decision.reason },
+          { status: 400 },
+        );
       }
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }

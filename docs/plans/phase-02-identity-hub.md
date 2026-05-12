@@ -45,6 +45,6 @@ Verifies the canonical exit criterion above and all Wave-1 security gates remain
 
 ## Mandatory Arcjet tasks (added v2)
 
-- OGS-162  Compose Arcjet `authEndpoint` over `/api/auth/**` in `apps/web-id/src/proxy.ts` (replace the Phase-0 `publicShield` default with route-aware selection). Verify OTP brute-force is denied after the 11th call inside one minute. See `SECURITY.md` §6.3.
-- OGS-163  Compose Arcjet `publicForm` on `/login`, `/signup`, `/forgot-password` in `apps/web-id` so disposable-email signups and bot UA strings are blocked at the edge. See `SECURITY.md` §6.2 (`protectSignup`).
-- OGS-164  Wire Sentry breadcrumb tagging for denied Arcjet decisions (`arcjet.denied` with `reason`, `path`, `ip` tags). Add a saved Sentry search "Arcjet denials last 24h" used in the weekly security sync.
+- OGS-162 Compose Arcjet `authEndpoint` over `/api/auth/**` in `apps/web-id/src/proxy.ts` (replace the Phase-0 `publicShield` default with route-aware selection). Verify OTP brute-force is denied after the 11th call inside one minute. See `SECURITY.md` §6.3.
+- OGS-163 Compose Arcjet `publicForm` on `/login`, `/signup`, `/forgot-password` in `apps/web-id` so disposable-email signups and bot UA strings are blocked at the edge. See `SECURITY.md` §6.2 (`protectSignup`).
+- OGS-164 Wire Sentry breadcrumb tagging for denied Arcjet decisions (`arcjet.denied` with `reason`, `path`, `ip` tags). Add a saved Sentry search "Arcjet denials last 24h" used in the weekly security sync.

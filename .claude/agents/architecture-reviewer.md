@@ -36,6 +36,7 @@ Engineering Lead.
 ## Triggers for ADR
 
 Per `AGENTS.md` §5. If you see any of these in a PR, block it until the ADR is accepted:
+
 - New runtime dependency.
 - Replacement of a locked technology.
 - Package split / merge.

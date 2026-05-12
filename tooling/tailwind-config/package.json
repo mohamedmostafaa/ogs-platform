@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "main": "preset.ts",
-  "files": ["preset.ts", "globals.css"],
+  "files": [
+    "preset.ts",
+    "globals.css"
+  ],
   "peerDependencies": {
     "tailwindcss": "^4.3.0"
   }

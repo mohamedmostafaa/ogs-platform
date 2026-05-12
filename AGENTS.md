@@ -54,28 +54,28 @@ These rules apply to every agent on every action.
 
 20 agents. Each owns a tightly defined slice. Every agent's full charter is in `.claude/agents/<role>.md`; this section is the index.
 
-| Role | File | Owns | Required reviewers on its PRs |
-|---|---|---|---|
-| Engineering Lead | `.claude/agents/engineering-lead.md` | Cross-team orchestration, Founder escalation, weekly sync | Architecture Reviewer + Code Reviewer |
-| Architecture Reviewer | `.claude/agents/architecture-reviewer.md` | ADR review, dependency review, schema-change approval | Engineering Lead |
-| Database Engineer | `.claude/agents/database-engineer.md` | `packages/db/**`, Prisma multi-file schema, extensions, migrations | Architecture Reviewer + Security Engineer + Code Reviewer |
-| Auth / Identity Engineer | `.claude/agents/auth-engineer.md` | `packages/auth/**`, `apps/web-id/**`, OIDC | Security Engineer + Code Reviewer |
-| API Engineer | `.claude/agents/api-engineer.md` | `packages/api/**`, tRPC routers, procedures | Database Engineer + Code Reviewer |
-| UI / Design System Engineer | `.claude/agents/ui-engineer.md` | `packages/ui/**`, theme, primitives, EntityX, Avatar | Code Reviewer |
-| Frontend Feature Engineer | `.claude/agents/frontend-feature-engineer.md` | `apps/web-*/src/modules/**` and `apps/web-*/src/app/**` for product surfaces | UI Engineer + Code Reviewer |
-| Live Video Engineer | `.claude/agents/live-video-engineer.md` | `packages/live-video/**`, Stream.io provider, CallShell, webhook | Security Engineer + Code Reviewer |
-| AI / ML Engineer | `.claude/agents/ai-engineer.md` | `packages/ai/**`, `packages/ai-evals/**`, prompts, RAG, evals | Architecture Reviewer + Code Reviewer |
-| Inngest / Workflow Engineer | `.claude/agents/inngest-engineer.md` | `packages/inngest/**`, `packages/inngest-functions/**`, `packages/workflow-editor/**` | Code Reviewer |
-| Payments Engineer | `.claude/agents/payments-engineer.md` | `packages/payments/**`, ledger, four-provider switcher, webhooks | Security Engineer + Code Reviewer |
-| Notifications / Email Engineer | `.claude/agents/notifications-engineer.md` | `packages/notifications/**`, `packages/email/**`, Nodemailer SMTP | Code Reviewer |
-| Files & VOD Engineer | `.claude/agents/files-vod-engineer.md` | `packages/files/**` (R2), `packages/video/**` (Bunny.net) | Security Engineer + Code Reviewer |
-| Security & Compliance Engineer | `.claude/agents/security-engineer.md` | `packages/security/**`, audit drills, ISO 17024 readiness, secrets envelope | Architecture Reviewer + Code Reviewer |
-| DevOps / Platform Engineer | `.claude/agents/devops-engineer.md` | CI/CD, Vercel projects, Neon branches, Sentry config, mprocs, env vars | Engineering Lead + Code Reviewer |
-| i18n Engineer | `.claude/agents/i18n-engineer.md` | `packages/i18n/**`, `messages/*.json`, RTL audits, Arabic copy | UI Engineer + Code Reviewer |
-| QA Engineer | `.claude/agents/qa-engineer.md` | Playwright suite, integration tests, smoke tests, exit-gate verification | Code Reviewer |
-| Code Reviewer | `.claude/agents/code-reviewer.md` | Required reviewer on every PR | Engineering Lead (for the Code Reviewer's own PRs) |
-| Task Curator | `.claude/agents/task-curator.md` | `TASKS.md`, ADR index, blueprint mirror in `docs/blueprint/blueprint.md` | Engineering Lead |
-| Documentation Writer | `.claude/agents/docs-writer.md` | `docs/runbooks/**`, READMEs, ADR drafting, PR template upkeep | Engineering Lead + Code Reviewer |
+| Role                           | File                                          | Owns                                                                                  | Required reviewers on its PRs                             |
+| ------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Engineering Lead               | `.claude/agents/engineering-lead.md`          | Cross-team orchestration, Founder escalation, weekly sync                             | Architecture Reviewer + Code Reviewer                     |
+| Architecture Reviewer          | `.claude/agents/architecture-reviewer.md`     | ADR review, dependency review, schema-change approval                                 | Engineering Lead                                          |
+| Database Engineer              | `.claude/agents/database-engineer.md`         | `packages/db/**`, Prisma multi-file schema, extensions, migrations                    | Architecture Reviewer + Security Engineer + Code Reviewer |
+| Auth / Identity Engineer       | `.claude/agents/auth-engineer.md`             | `packages/auth/**`, `apps/web-id/**`, OIDC                                            | Security Engineer + Code Reviewer                         |
+| API Engineer                   | `.claude/agents/api-engineer.md`              | `packages/api/**`, tRPC routers, procedures                                           | Database Engineer + Code Reviewer                         |
+| UI / Design System Engineer    | `.claude/agents/ui-engineer.md`               | `packages/ui/**`, theme, primitives, EntityX, Avatar                                  | Code Reviewer                                             |
+| Frontend Feature Engineer      | `.claude/agents/frontend-feature-engineer.md` | `apps/web-*/src/modules/**` and `apps/web-*/src/app/**` for product surfaces          | UI Engineer + Code Reviewer                               |
+| Live Video Engineer            | `.claude/agents/live-video-engineer.md`       | `packages/live-video/**`, Stream.io provider, CallShell, webhook                      | Security Engineer + Code Reviewer                         |
+| AI / ML Engineer               | `.claude/agents/ai-engineer.md`               | `packages/ai/**`, `packages/ai-evals/**`, prompts, RAG, evals                         | Architecture Reviewer + Code Reviewer                     |
+| Inngest / Workflow Engineer    | `.claude/agents/inngest-engineer.md`          | `packages/inngest/**`, `packages/inngest-functions/**`, `packages/workflow-editor/**` | Code Reviewer                                             |
+| Payments Engineer              | `.claude/agents/payments-engineer.md`         | `packages/payments/**`, ledger, four-provider switcher, webhooks                      | Security Engineer + Code Reviewer                         |
+| Notifications / Email Engineer | `.claude/agents/notifications-engineer.md`    | `packages/notifications/**`, `packages/email/**`, Nodemailer SMTP                     | Code Reviewer                                             |
+| Files & VOD Engineer           | `.claude/agents/files-vod-engineer.md`        | `packages/files/**` (R2), `packages/video/**` (Bunny.net)                             | Security Engineer + Code Reviewer                         |
+| Security & Compliance Engineer | `.claude/agents/security-engineer.md`         | `packages/security/**`, audit drills, ISO 17024 readiness, secrets envelope           | Architecture Reviewer + Code Reviewer                     |
+| DevOps / Platform Engineer     | `.claude/agents/devops-engineer.md`           | CI/CD, Vercel projects, Neon branches, Sentry config, mprocs, env vars                | Engineering Lead + Code Reviewer                          |
+| i18n Engineer                  | `.claude/agents/i18n-engineer.md`             | `packages/i18n/**`, `messages/*.json`, RTL audits, Arabic copy                        | UI Engineer + Code Reviewer                               |
+| QA Engineer                    | `.claude/agents/qa-engineer.md`               | Playwright suite, integration tests, smoke tests, exit-gate verification              | Code Reviewer                                             |
+| Code Reviewer                  | `.claude/agents/code-reviewer.md`             | Required reviewer on every PR                                                         | Engineering Lead (for the Code Reviewer's own PRs)        |
+| Task Curator                   | `.claude/agents/task-curator.md`              | `TASKS.md`, ADR index, blueprint mirror in `docs/blueprint/blueprint.md`              | Engineering Lead                                          |
+| Documentation Writer           | `.claude/agents/docs-writer.md`               | `docs/runbooks/**`, READMEs, ADR drafting, PR template upkeep                         | Engineering Lead + Code Reviewer                          |
 
 > The Engineering Lead is the only agent that may dispatch and coordinate multiple agents in parallel. All other agents work on a single task at a time.
 
@@ -153,26 +153,26 @@ Every task — without exception — runs this sequence.
 
 The following are forbidden for any agent. Doing them triggers an immediate revert and an escalation to the Engineering Lead. Repeated violation triggers a role suspension review by the Founder.
 
-| Red line | Why |
-|---|---|
-| Merging your own PR | Two-person rule |
-| Introducing a dependency outside blueprint §3 without an ADR | Locked stack |
-| Modifying the Prisma schema in a PR without Database Engineer + Architecture Reviewer + Security Engineer approval | Schema is global state |
-| Bypassing `@ogs/db`'s extension stack (soft-delete, tenant-scope, audit) via raw SQL | ISO 17024 audit defensibility |
-| Committing `.env*`, generated Prisma clients, customer data, vendor secrets | Security |
-| Sending mail outside `@ogs/email`'s Nodemailer SMTP transport | One-transport rule |
-| Calling any payment provider outside `@ogs/payments` | Provider abstraction |
-| Calling any AI provider outside `@ogs/ai/runtime/run-ai-task` | Telemetry + guardrails |
-| Hard-deleting from a soft-deletable table | Auditability |
-| Writing to AuditLog directly (not via the extension) | Append-only invariant |
-| Changing `TASKS.md` to mark `[x]` without the closing PR merged | Status integrity |
-| Speaking to a vendor / posting outside / making a commercial decision | Founder-only |
-| Using `git push --force` to `main` | History integrity |
-| Using `git commit --amend` on a pushed commit | History integrity |
-| Disabling a pre-commit hook or CI check | Process integrity |
-| Adding a third-party avatar library (DiceBear, BoringAvatars, etc.) | Blueprint §3.1 |
-| Using Mux for VOD | Blueprint locks Bunny.net Stream |
-| Adding ESLint/Prettier alternatives (Biome, dprint, etc.) | Blueprint §3 locks ESLint + Prettier |
+| Red line                                                                                                           | Why                                  |
+| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| Merging your own PR                                                                                                | Two-person rule                      |
+| Introducing a dependency outside blueprint §3 without an ADR                                                       | Locked stack                         |
+| Modifying the Prisma schema in a PR without Database Engineer + Architecture Reviewer + Security Engineer approval | Schema is global state               |
+| Bypassing `@ogs/db`'s extension stack (soft-delete, tenant-scope, audit) via raw SQL                               | ISO 17024 audit defensibility        |
+| Committing `.env*`, generated Prisma clients, customer data, vendor secrets                                        | Security                             |
+| Sending mail outside `@ogs/email`'s Nodemailer SMTP transport                                                      | One-transport rule                   |
+| Calling any payment provider outside `@ogs/payments`                                                               | Provider abstraction                 |
+| Calling any AI provider outside `@ogs/ai/runtime/run-ai-task`                                                      | Telemetry + guardrails               |
+| Hard-deleting from a soft-deletable table                                                                          | Auditability                         |
+| Writing to AuditLog directly (not via the extension)                                                               | Append-only invariant                |
+| Changing `TASKS.md` to mark `[x]` without the closing PR merged                                                    | Status integrity                     |
+| Speaking to a vendor / posting outside / making a commercial decision                                              | Founder-only                         |
+| Using `git push --force` to `main`                                                                                 | History integrity                    |
+| Using `git commit --amend` on a pushed commit                                                                      | History integrity                    |
+| Disabling a pre-commit hook or CI check                                                                            | Process integrity                    |
+| Adding a third-party avatar library (DiceBear, BoringAvatars, etc.)                                                | Blueprint §3.1                       |
+| Using Mux for VOD                                                                                                  | Blueprint locks Bunny.net Stream     |
+| Adding ESLint/Prettier alternatives (Biome, dprint, etc.)                                                          | Blueprint §3 locks ESLint + Prettier |
 
 ---
 
@@ -210,19 +210,19 @@ The Architecture Reviewer is the sole owner of ADR acceptance. The Engineering L
 
 When in doubt, this matrix tells you which skill to invoke. Apply the first row that matches.
 
-| Situation | Skill to invoke first | Then |
-|---|---|---|
-| Starting any session | `superpowers:using-superpowers` | — |
-| Open-ended creative work, designing | `superpowers:brainstorming` | `superpowers:writing-plans` |
-| Implementing a feature or bug fix | `superpowers:test-driven-development` | `superpowers:verification-before-completion` |
-| Investigating a bug | `superpowers:systematic-debugging` | TDD when root cause known |
-| Have a spec, need a plan | `superpowers:writing-plans` | `superpowers:executing-plans` |
-| Have a plan, executing in parallel | `superpowers:subagent-driven-development` | — |
-| Need 2+ agents to work in parallel | `superpowers:dispatching-parallel-agents` | — |
-| Asking for code review | `superpowers:requesting-code-review` | — |
-| Receiving code review | `superpowers:receiving-code-review` | — |
-| About to merge | `superpowers:verification-before-completion` | `superpowers:finishing-a-development-branch` |
-| Authoring or editing a skill | `superpowers:writing-skills` | — |
+| Situation                           | Skill to invoke first                        | Then                                         |
+| ----------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| Starting any session                | `superpowers:using-superpowers`              | —                                            |
+| Open-ended creative work, designing | `superpowers:brainstorming`                  | `superpowers:writing-plans`                  |
+| Implementing a feature or bug fix   | `superpowers:test-driven-development`        | `superpowers:verification-before-completion` |
+| Investigating a bug                 | `superpowers:systematic-debugging`           | TDD when root cause known                    |
+| Have a spec, need a plan            | `superpowers:writing-plans`                  | `superpowers:executing-plans`                |
+| Have a plan, executing in parallel  | `superpowers:subagent-driven-development`    | —                                            |
+| Need 2+ agents to work in parallel  | `superpowers:dispatching-parallel-agents`    | —                                            |
+| Asking for code review              | `superpowers:requesting-code-review`         | —                                            |
+| Receiving code review               | `superpowers:receiving-code-review`          | —                                            |
+| About to merge                      | `superpowers:verification-before-completion` | `superpowers:finishing-a-development-branch` |
+| Authoring or editing a skill        | `superpowers:writing-skills`                 | —                                            |
 
 ---
 
@@ -263,6 +263,7 @@ Workflows defined in `.github/workflows/ci.yml` (created in Phase 0):
 8. `pr-template-check` — fails if the PR body does not include the `## Skills invoked` heading.
 
 Pre-commit (Husky + lint-staged):
+
 - `prettier --write` on staged files.
 - `eslint --fix` on staged files.
 - `pnpm typecheck` on the affected workspace.

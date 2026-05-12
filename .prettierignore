@@ -1,0 +1,17 @@
+# Generated / vendored — never auto-format.
+.next/
+out/
+.turbo/
+dist/
+build/
+coverage/
+node_modules/
+pnpm-lock.yaml
+.vercel/
+packages/db/src/generated/
+
+# Prisma-managed migration SQL (Prisma's own formatter owns these).
+packages/db/prisma/schema/migrations/
+
+# Blueprint binary.
+docs/blueprint/*.docx
