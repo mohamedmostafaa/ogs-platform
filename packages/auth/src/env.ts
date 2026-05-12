@@ -50,5 +50,18 @@ export function getAuthSecret(): string {
  * NEXT_PUBLIC_BASE_URL).
  */
 export function getAuthBaseUrl(): string {
-  return process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const url = process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_BASE_URL;
+  if (url && url.length > 0) return url;
+
+  // Per SECURITY.md Gate 1, never mint OIDC tokens with iss=localhost
+  // in production. The dev/build fallback is intentional but production
+  // requests must have the env set.
+  const isBuild = process.env.NEXT_PHASE === "phase-production-build";
+  if (process.env.NODE_ENV === "production" && !isBuild) {
+    throw new Error(
+      "[@ogs/auth] BETTER_AUTH_URL (or NEXT_PUBLIC_BASE_URL) is required in production. " +
+        "Otherwise OIDC tokens would be minted with iss=http://localhost:3000.",
+    );
+  }
+  return "http://localhost:3000";
 }

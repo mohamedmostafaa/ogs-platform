@@ -2,20 +2,20 @@
  * Server-side auth guards.
  *
  * The four building blocks every protected surface composes from:
- *   - `requireAuth(req)`     → user must be signed in.
- *   - `requireRole(role)`    → user must hold a Membership in the
- *                              active tenant with the given role.
- *   - `requireTenant(slug)`  → user must belong to the named tenant.
- *   - `requireFeature(flag)` → tenant must have the FeatureFlag on.
+ *   - `requireAuth(headers)`               → user must be signed in.
+ *   - `requireTenant(headers, slug)`       → user must belong to that tenant.
+ *   - `requireRole(headers, role, slug)`   → user must hold that role IN that tenant.
+ *   - `requireFeature(flagKey, tenantId)`  → tenant has the FeatureFlag on.
  *
  * Plus a tRPC-flavoured shortcut:
- *   - `trpcRequireAuth(ctx)` → throws TRPCError "UNAUTHORIZED" rather
- *                              than a plain Error.
+ *   - `trpcRequireAuth(headers)` → re-throws `AuthGuardError` so the tRPC
+ *                                  formatter in `@ogs/api` can map to
+ *                                  `TRPCError({ code: "UNAUTHORIZED" })`.
  *
  * Each guard reads the active session via Better Auth, then consults
  * `@ogs/db` (composed client) so the same tenant-scope rules apply.
  *
- * @see Blueprint §6.8.
+ * @see Blueprint §6.8, SECURITY.md Gate 3.
  */
 import { prisma, type ActorContext } from "@ogs/db";
 import type { Role } from "@ogs/config";
@@ -34,9 +34,7 @@ export class AuthGuardError extends Error {
 }
 
 /**
- * Resolve the current session, or throw UNAUTHENTICATED. Wraps Better
- * Auth's `api.getSession` so callers don't need to know the underlying
- * call shape.
+ * Resolve the current session, or throw UNAUTHENTICATED.
  */
 export async function requireAuth(headers: Headers): Promise<AuthSession> {
   const session = await auth.api.getSession({ headers });
@@ -47,39 +45,10 @@ export async function requireAuth(headers: Headers): Promise<AuthSession> {
 }
 
 /**
- * Ensure the signed-in user holds the given Role in the named tenant.
- *
- * `tenantSlug` may be omitted; callers usually resolve the tenant
- * earlier in the request lifecycle (e.g. from a subdomain or path
- * param) and pass it explicitly.
- */
-export async function requireRole(
-  headers: Headers,
-  role: Role,
-  tenantSlug?: string,
-): Promise<{ session: AuthSession; tenantId: string }> {
-  const session = await requireAuth(headers);
-  const userId = session.user.id;
-
-  const membership = await prisma.membership.findFirst({
-    where: {
-      userId,
-      role,
-      ...(tenantSlug ? { tenant: { slug: tenantSlug } } : {}),
-    },
-  });
-  if (!membership) {
-    throw new AuthGuardError(
-      "FORBIDDEN",
-      `Role "${role}" required${tenantSlug ? ` in tenant "${tenantSlug}"` : ""}.`,
-    );
-  }
-  return { session, tenantId: membership.tenantId };
-}
-
-/**
  * Ensure the signed-in user is a member of the named tenant (any role).
- * Returns the membership row so downstream code knows which role.
+ *
+ * The caller resolves the tenant from request context (subdomain,
+ * path param, ...) and passes the slug — guards never guess.
  */
 export async function requireTenant(
   headers: Headers,
@@ -98,54 +67,69 @@ export async function requireTenant(
 }
 
 /**
- * Gate behind a FeatureFlag. Falls back to the global default flag
- * when no tenant-specific override exists; treats the absence of any
- * flag row as "off".
+ * Ensure the signed-in user holds the given Role in the named tenant.
+ *
+ * `tenantSlug` is **mandatory**. An earlier draft allowed it to be
+ * optional and resolved "any tenant where the user has this role" —
+ * which is a horizontal-privilege-escalation bug (Phase-A B1). The
+ * caller MUST establish tenant context first and pass it in.
+ */
+export async function requireRole(
+  headers: Headers,
+  role: Role,
+  tenantSlug: string,
+): Promise<{ session: AuthSession; tenantId: string }> {
+  const { session, tenantId, role: membershipRole } = await requireTenant(headers, tenantSlug);
+  if (membershipRole !== role) {
+    throw new AuthGuardError("FORBIDDEN", `Role "${role}" required in tenant "${tenantSlug}".`);
+  }
+  return { session, tenantId };
+}
+
+/**
+ * Gate behind a FeatureFlag.
+ *
+ * Lookup order:
+ *   1. Tenant-specific override (`key`, `tenantId = <given>`).
+ *   2. Global default (`key`, `tenantId IS NULL`).
+ *
+ * Both branches use `findFirst` (NOT `findUnique`) because Postgres
+ * treats NULL as distinct in `@@unique([key, tenantId])`, so the
+ * global-default lookup needs `IS NULL` semantics. (The audit caught
+ * the earlier `null as never` cast as a footgun.)
+ *
+ * **Phase-1 value DSL: only `"true"` is treated as ON.** The schema
+ * documents a richer DSL (`"percentage:25"`, `"users:[id1,id2]"`)
+ * which lands in Phase 2 (tracked under a new OGS task). Any value
+ * other than `"true"` (case-insensitive, trimmed) fails closed.
+ *
+ * @see Blueprint §5.17.
  */
 export async function requireFeature(flagKey: string, tenantId: string | null): Promise<void> {
-  // Tenant-specific override first, fall back to global.
   const flag =
-    (tenantId
-      ? await prisma.featureFlag.findUnique({ where: { key_tenantId: { key: flagKey, tenantId } } })
-      : null) ??
-    (await prisma.featureFlag.findUnique({
-      where: { key_tenantId: { key: flagKey, tenantId: null as never } },
-    }));
+    (tenantId ? await prisma.featureFlag.findFirst({ where: { key: flagKey, tenantId } }) : null) ??
+    (await prisma.featureFlag.findFirst({ where: { key: flagKey, tenantId: null } }));
 
   if (!flag) {
     throw new AuthGuardError("FEATURE_DISABLED", `Feature "${flagKey}" is disabled.`);
   }
-  // Simple DSL: "true" / "false" / "percentage:25" / "users:[..]"
-  // Phase 02 will land the full evaluator; for now we treat exact
-  // "true" as on, everything else as off.
-  if (flag.value !== "true") {
+  if (flag.value.trim().toLowerCase() !== "true") {
     throw new AuthGuardError("FEATURE_DISABLED", `Feature "${flagKey}" is disabled.`);
   }
 }
 
 /**
- * tRPC convenience wrapper. tRPC's TRPCError isn't a peer dep here, so
- * we shape the error to be caught by the tRPC error formatter in
- * @ogs/api — it sees `code: "UNAUTHENTICATED"` and re-throws as
- * `TRPCError({ code: "UNAUTHORIZED" })`.
+ * tRPC convenience wrapper. The tRPC error formatter in `@ogs/api`
+ * inspects `err instanceof AuthGuardError` and maps to a typed
+ * TRPCError. Re-throwing the same instance keeps the contract typed.
  */
 export async function trpcRequireAuth(headers: Headers): Promise<AuthSession> {
-  try {
-    return await requireAuth(headers);
-  } catch (err) {
-    if (err instanceof AuthGuardError) {
-      const wrapped = new Error(err.message);
-      (wrapped as { code?: string }).code = "UNAUTHENTICATED";
-      throw wrapped;
-    }
-    throw err;
-  }
+  return requireAuth(headers);
 }
 
 /**
  * Build an `ActorContext` from a session + tenant, ready to hand to
- * `runWithActor()`. Centralises the "session → DB context" mapping so
- * route handlers don't reinvent it.
+ * `runWithActor()`. Centralises the "session → DB context" mapping.
  */
 export function actorFromSession(
   session: AuthSession,

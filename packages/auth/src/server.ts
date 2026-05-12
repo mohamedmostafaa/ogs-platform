@@ -24,6 +24,7 @@ import { jwt } from "better-auth/plugins";
 import { prisma } from "@ogs/db";
 
 import { getAuthBaseUrl, getAuthSecret } from "./env";
+import { provisionUser } from "./provisioning";
 
 /**
  * Optionally include a social provider only when both credentials are
@@ -78,6 +79,23 @@ export const auth = betterAuth({
   socialProviders: Object.fromEntries(
     Object.entries(socialProviders).filter(([, v]) => v !== undefined),
   ) as Record<string, { clientId: string; clientSecret: string }>,
+  databaseHooks: {
+    /**
+     * Post-signup provisioning. Better Auth fires this AFTER it creates
+     * the User row, but BEFORE the response returns — so the Worker
+     * + Membership exist by the time the client receives a session.
+     * Idempotent (re-running on an already-provisioned user is a no-op).
+     *
+     * Wraps the work in runWithActor so the writes are audited (Gate 4).
+     */
+    user: {
+      create: {
+        after: async (user: { id: string }) => {
+          await provisionUser({ userId: user.id });
+        },
+      },
+    },
+  },
   plugins: [
     /**
      * JWT plugin — REQUIRED by oauthProvider so it can mint ID tokens.
