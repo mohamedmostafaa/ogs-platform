@@ -28,8 +28,11 @@ export const publicShield = arcjet({
         "CATEGORY:SEARCH_ENGINE",
         // Uptime + observability probes (Vercel monitoring, Sentry, etc.).
         "CATEGORY:MONITOR",
-        // Social link unfurlers (LinkedIn job shares, WhatsApp previews).
+        // Page-preview crawlers (Twitter / WhatsApp / Telegram unfurlers).
         "CATEGORY:PREVIEW",
+        // Social-platform fetchers (LinkedIn job-share refresh, Facebook,
+        // Slack link unfurl). Critical for Careers reach.
+        "CATEGORY:SOCIAL",
       ],
     }),
   ],

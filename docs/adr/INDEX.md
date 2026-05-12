@@ -6,10 +6,11 @@ deviation needs an ADR written **before** the code change. ADRs are
 chronological; the `Status` line says whether each is Accepted, Proposed,
 Superseded, or Rejected.
 
-| ID                                  | Title                                          | Status   |
-| ----------------------------------- | ---------------------------------------------- | -------- |
-| [0000](./0000-template.md)          | (template — copy when authoring)               | —        |
-| [0001](./0001-proxy-ts-location.md) | `proxy.ts` lives at `apps/<name>/src/proxy.ts` | Accepted |
+| ID                                       | Title                                                      | Status   |
+| ---------------------------------------- | ---------------------------------------------------------- | -------- |
+| [0000](./0000-template.md)               | (template — copy when authoring)                           | —        |
+| [0001](./0001-proxy-ts-location.md)      | `proxy.ts` lives at `apps/<name>/src/proxy.ts`             | Accepted |
+| [0002](./0002-arcjet-rule-set-naming.md) | Arcjet rule-set naming + add `authEndpoint` + `aiEndpoint` | Accepted |
 
 Add new ADRs by copying `0000-template.md` to `NNNN-<slug>.md` and bumping
 this index in the same PR.

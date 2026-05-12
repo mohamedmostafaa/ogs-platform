@@ -1,4 +1,4 @@
-import arcjet, { detectBot, fixedWindow, shield } from "@arcjet/next";
+import arcjet, { detectBot, shield, slidingWindow } from "@arcjet/next";
 
 import { arcjetMode, getArcjetKey } from "./env";
 
@@ -30,9 +30,11 @@ export const mediaUpload = arcjet({
       mode: arcjetMode(),
       allow: [],
     }),
-    fixedWindow({
+    // Sliding window avoids the fixed-window boundary-doubling issue
+    // (40 uploads in 1 s across the minute-boundary).
+    slidingWindow({
       mode: arcjetMode(),
-      window: "1h",
+      interval: "1h",
       max: 20,
     }),
   ],
