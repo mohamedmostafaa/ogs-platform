@@ -16,7 +16,7 @@ packages/db/**                     @database-engineer @architecture-reviewer @se
 
 # Auth
 packages/auth/**                   @auth-engineer @security-engineer @code-reviewer
-apps/web-id/**                     @auth-engineer @security-engineer @code-reviewer
+apps/id/**                     @auth-engineer @security-engineer @code-reviewer
 
 # API
 packages/api/**                    @api-engineer @database-engineer @code-reviewer
@@ -25,13 +25,13 @@ packages/api/**                    @api-engineer @database-engineer @code-review
 packages/ui/**                     @ui-engineer @code-reviewer
 
 # Frontend feature modules
-apps/web-careers/**                @frontend-feature-engineer @ui-engineer @code-reviewer
-apps/web-skillpass/**              @frontend-feature-engineer @ui-engineer @code-reviewer
-apps/web-academy/**                @frontend-feature-engineer @ui-engineer @code-reviewer
-apps/web-eco/**                    @frontend-feature-engineer @ui-engineer @code-reviewer
-apps/web-enterprise/**             @frontend-feature-engineer @ui-engineer @code-reviewer
-apps/web-corporate/**              @frontend-feature-engineer @ui-engineer @code-reviewer
-apps/web-admin/**                  @frontend-feature-engineer @engineering-lead @code-reviewer
+apps/careers/**                @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/skillpass/**              @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/academy/**                @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/eco/**                    @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/enterprise/**             @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/corporate/**              @frontend-feature-engineer @ui-engineer @code-reviewer
+apps/admin/**                  @frontend-feature-engineer @engineering-lead @code-reviewer
 
 # Live video
 packages/live-video/**             @live-video-engineer @security-engineer @code-reviewer

@@ -101,7 +101,7 @@ const LOCKED: readonly Locked[] = [
   { name: "@lemonsqueezy/lemonsqueezy.js", floor: "4.0.0", owner: "@payments-engineer" },
   { name: "@polar-sh/sdk", floor: "0.47.1", owner: "@payments-engineer" },
   // Observability
-  { name: "@sentry/nextjs", floor: "10.52.0", owner: "@devops-engineer" },
+  { name: "@sentry/nextjs", floor: "10.53.1", owner: "@devops-engineer" },
   // PDF
   { name: "@react-pdf/renderer", floor: "4.5.1", owner: "@docs-writer" },
   // Lint + format + tooling

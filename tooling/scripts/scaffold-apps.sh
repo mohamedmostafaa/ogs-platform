@@ -56,8 +56,8 @@ for entry in "${APPS[@]}"; do
   },
   "dependencies": {
     "next": "16.2.6",
-    "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@ogs/eslint-config": "workspace:*",

@@ -29,31 +29,62 @@ jobs:
                   ':!packages/db/prisma/schema/**' \
                   | grep -E '^\+' | grep -v '^\+\+\+' | sed 's/^\+//')
 
-          fail=0
-          declare -A DEAD=(
-            ["middleware\\.ts"]="middleware.ts → proxy.ts (Next.js 16)"
-            ["export function middleware"]="export function middleware → export function proxy (Next.js 16)"
-            ["skipMiddlewareUrlNormalize"]="skipMiddlewareUrlNormalize → skipProxyUrlNormalize (Next.js 16)"
-            ["prisma-client-js"]="prisma-client-js → prisma-client (Prisma 7)"
-            ["import \\{ generateObject"]="generateObject → generateText({ output: ... }) (Vercel AI SDK v6)"
-            ["CoreMessage"]="CoreMessage → ModelMessage (Vercel AI SDK v6)"
-            ["textEmbeddingModel"]="textEmbeddingModel → embeddingModel (Vercel AI SDK v6)"
-            ["oidcProvider"]="oidcProvider → @better-auth/oauth-provider (Better Auth 1.6)"
-            ["apiVersion: \"2024-10-28\\.acacia"]="Stripe apiVersion 2024-10-28.acacia → 2026-03-25.dahlia (Stripe 22)"
-            [", *\\{ event:"]="3-arg createFunction → 2-arg with triggers in options (Inngest 4)"
-            ["from \"@inngest/realtime/middleware\""]="ok (kept) — but verify inngest 4 middleware shape"
-            ["PanelGroup\\b"]="PanelGroup → Group (react-resizable-panels 4)"
-            ["PanelResizeHandle"]="PanelResizeHandle → Separator (react-resizable-panels 4)"
-            ["fromMonth=\"|toMonth=\"|fromYear=|toYear="]="fromMonth/toMonth/fromYear/toYear → startMonth/endMonth/hidden (react-day-picker 10)"
-            ["import \\{ MessageInput"]="MessageInput → MessageComposer (stream-chat-react 14)"
-            ["useMessageInputContext"]="useMessageInputContext → useMessageComposerContext (stream-chat-react 14)"
-            ["withChannelStateContext|withChatContext|withMessageContext"]="HOC wrappers removed; use hooks (stream-chat-react 14)"
-            ["\\.eslintrc"]=".eslintrc removed; flat config only (ESLint 10)"
+          # Parallel-array dispatch so attribution is deterministic regardless of
+          # bash version's associative-array iteration order. Each PATTERNS[i]
+          # has a matching MESSAGES[i].
+          PATTERNS=(
+            'middleware\.ts'
+            'export function middleware'
+            'NextMiddleware'
+            'skipMiddlewareUrlNormalize'
+            'experimental\.middleware'
+            'runtime:\s*["'"'"']edge["'"'"']'
+            'prisma-client-js'
+            'datasource db \{[^}]*url\s*='
+            'import \{ generateObject'
+            'CoreMessage'
+            'textEmbeddingModel'
+            'oidcProvider'
+            'apiVersion: "2024-10-28\.acacia'
+            ', *\{ event:'
+            'PanelGroup\b'
+            'PanelResizeHandle'
+            'fromMonth="|toMonth="|fromYear=|toYear='
+            'import \{ MessageInput'
+            'useMessageInputContext'
+            'withChannelStateContext|withChatContext|withMessageContext'
+            '\.eslintrc'
+          )
+          MESSAGES=(
+            'middleware.ts → proxy.ts (Next.js 16)'
+            'export function middleware → export function proxy (Next.js 16)'
+            'NextMiddleware type → NextProxy (Next.js 16)'
+            'skipMiddlewareUrlNormalize → skipProxyUrlNormalize (Next.js 16)'
+            'experimental.middleware → experimental.proxy (Next.js 16)'
+            'runtime: "edge" on a route/page — proxy.ts must declare runtime separately, app routes default to Node runtime (Next.js 16)'
+            'prisma-client-js → prisma-client (Prisma 7)'
+            'datasource db { url = ... } — Prisma 7 moves url/directUrl to prisma.config.ts'
+            'generateObject → generateText({ output: ... }) (Vercel AI SDK v6)'
+            'CoreMessage → ModelMessage (Vercel AI SDK v6)'
+            'textEmbeddingModel → embeddingModel (Vercel AI SDK v6)'
+            'oidcProvider → oauthProvider (@better-auth/oauth-provider 1.6)'
+            'Stripe apiVersion 2024-10-28.acacia → 2026-03-25.dahlia (Stripe 22)'
+            '3-arg createFunction → 2-arg with triggers in options (Inngest 4)'
+            'PanelGroup → Group (react-resizable-panels 4)'
+            'PanelResizeHandle → Separator (react-resizable-panels 4)'
+            'fromMonth/toMonth/fromYear/toYear → startMonth/endMonth/hidden (react-day-picker 10)'
+            'MessageInput → MessageComposer (stream-chat-react 14)'
+            'useMessageInputContext → useMessageComposerContext (stream-chat-react 14)'
+            'HOC wrappers removed; use hooks (stream-chat-react 14)'
+            '.eslintrc removed; flat config only (ESLint 10)'
           )
 
-          for pattern in "${!DEAD[@]}"; do
-            if echo "$ADDED" | grep -E -q "$pattern"; then
-              echo "::error::Forbidden pattern '$pattern' introduced — ${DEAD[$pattern]}"
+          fail=0
+          for i in "${!PATTERNS[@]}"; do
+            pattern="${PATTERNS[$i]}"
+            message="${MESSAGES[$i]}"
+            if echo "$ADDED" | grep -E -q -- "$pattern"; then
+              echo "::error::Forbidden pattern '$pattern' introduced — $message"
               fail=1
             fi
           done
