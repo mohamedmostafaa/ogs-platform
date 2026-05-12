@@ -6,8 +6,10 @@ packages:
   - "packages/*"
   - "tooling/*"
 allowBuilds:
-  esbuild: true
-  inngest-cli: true
+  sharp: true
+  unrs-resolver: true
 onlyBuiltDependencies:
   - esbuild
   - inngest-cli
+  - sharp
+  - unrs-resolver

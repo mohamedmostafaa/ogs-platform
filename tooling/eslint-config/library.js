@@ -13,9 +13,16 @@
  */
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
-import importPlugin from "eslint-plugin-import";
 
-/** @type {import('eslint').Linter.Config[]} */
+/**
+ * NOTE: `eslint-plugin-import` 2.32 still calls APIs that ESLint 10
+ * removed (`sourceCode.getTokenOrCommentBefore`). Until the plugin
+ * publishes an ESLint-10-compatible release, we omit `import/order`.
+ * Next.js's own linter (eslint-config-next) covers basic ordering for
+ * apps; we'll re-enable here once upstream lands the fix.
+ *
+ * Tracking: https://github.com/import-js/eslint-plugin-import/issues
+ */
 export default [
   {
     files: ["**/*.{ts,tsx,js,jsx,mjs,cjs}"],
@@ -25,20 +32,13 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tseslint,
-      import: importPlugin,
     },
     rules: {
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-      "@typescript-eslint/no-explicit-any": "warn",
-      "import/order": [
+      "@typescript-eslint/no-unused-vars": [
         "warn",
-        {
-          "newlines-between": "always",
-          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
-          pathGroups: [{ pattern: "@ogs/**", group: "internal", position: "before" }],
-          alphabetize: { order: "asc", caseInsensitive: true },
-        },
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
+      "@typescript-eslint/no-explicit-any": "warn",
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
