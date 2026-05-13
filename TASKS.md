@@ -251,6 +251,7 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 - [x] `OGS-123` `/login` (modules/auth + tRPC + RHF/zod, ratelimited via Arcjet) — @auth-engineer — §6.1
 - [x] `OGS-124` `/signup` (modules/auth + tRPC + RHF/zod) — @auth-engineer — §6.1
 - [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5 (DEFERRED — twoFactor plugin landed; UI pending)
+- [x] `OGS-125a` `InputOTP` primitive added to `@ogs/ui` (consumer of OGS-125) — @ui-engineer — §9
 - [x] `OGS-126` `/account/sessions` (Suspense + tRPC, masked IP) — @auth-engineer — §6.11
 - [x] `OGS-127` `/forbidden` page used by guards — @auth-engineer — §6.8
 - [ ] `OGS-128` Unit tests for `safeCallbackURL` + `maskIp` (open-redirect + PII boundary) — @qa-engineer — follow-up

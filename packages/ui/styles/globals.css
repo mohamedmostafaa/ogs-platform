@@ -126,3 +126,29 @@
       "ss01" 1;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Component-level keyframes used by shadcn primitives in `@ogs/ui`.
+ *
+ * `caret-blink` powers the focus caret in `<InputOTPSlot>` (see
+ * `packages/ui/src/primitives/input-otp.tsx`). Without this rule the
+ * `animate-caret-blink` class compiles to a no-op and the caret stays
+ * static. Tailwind v4 utility class `.animate-caret-blink` resolves
+ * to the matching `animation-name` via the keyframe name below.
+ * Flagged by the Code Reviewer on the InputOTP primitive PR.
+ * ------------------------------------------------------------------------- */
+@keyframes caret-blink {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  50% {
+    opacity: 0;
+  }
+}
+
+@utility animate-caret-blink {
+  animation: caret-blink 1.25s ease-out infinite;
+}

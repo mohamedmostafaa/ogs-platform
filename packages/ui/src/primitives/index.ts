@@ -84,6 +84,8 @@ export {
 } from "./form";
 // Input
 export { Input, type InputProps } from "./input";
+// InputOTP
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "./input-otp";
 // Label
 export { Label } from "./label";
 // Popover
