@@ -245,9 +245,9 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 
 ### Identity hub Better Auth (oauthProvider, NOT oidcProvider)
 
-- [ ] `OGS-120` `apps/web-id/src/lib/auth.ts` with `oauthProvider` + `jwt` + `emailOTP` + `twoFactor` (per blueprint §6.2) — @auth-engineer — §6.2
+- [x] `OGS-120` `packages/auth/src/server.ts` with `oauthProvider` + `jwt` + `emailOTP` + `twoFactor` (per blueprint §6.2) — @auth-engineer — §6.2
 - [ ] `OGS-121` Catch-all auth route `apps/web-id/src/app/api/auth/[...all]/route.ts` — @auth-engineer — §6.3
-- [ ] `OGS-122` `packages/auth/src/auth-client.ts` (genericOAuthClient + emailOTPClient + twoFactorClient) — @auth-engineer — §6.5
+- [x] `OGS-122` `packages/auth/src/client-config.ts` extended with `genericOAuthClient` + `emailOTPClient` + `twoFactorClient` — @auth-engineer — §6.5
 - [x] `OGS-123` `/login` page in web-id (email+password) — @auth-engineer — §6.1
 - [x] `OGS-124` `/signup` page in web-id (email+password) — @auth-engineer — §6.1
 - [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5 (DEFERRED — twoFactor plugin lands in Chunk A)
@@ -273,7 +273,7 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 - [x] `OGS-150` `packages/email/src/transport.ts` (Nodemailer 8 + SMTP, pooled) — @notifications-engineer — §18.3
 - [x] `OGS-151` `magic-otp.tsx` React Email template — @notifications-engineer — §18.4
 - [x] `OGS-152` `render.ts` dispatcher — @notifications-engineer — §18.4
-- [ ] `OGS-153` Wire `sendOTPEmail` into Better Auth `emailOTP.sendVerificationOTP` — @auth-engineer + @notifications-engineer — §6.2
+- [x] `OGS-153` Wire `sendOTPEmail` into Better Auth `emailOTP.sendVerificationOTP` — @auth-engineer + @notifications-engineer — §6.2
 - [ ] `OGS-154` Mailtrap dev SMTP creds — @devops-engineer — §28.1
 
 ### Admin role gate + seed

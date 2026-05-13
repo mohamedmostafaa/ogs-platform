@@ -35,6 +35,18 @@ export class AuthGuardError extends Error {
 
 /**
  * Resolve the current session, or throw UNAUTHENTICATED.
+ *
+ * TODO(OGS-125): once the `/2fa` UI ships, tighten this guard to also
+ * reject sessions where `session.twoFactorVerified === false` for any
+ * user who has `twoFactorEnabled === true`. Today the `twoFactor`
+ * plugin is wired server-side but the verification gate is not
+ * enforced here — a user can enable 2FA, sign in with password only,
+ * and reach protected routes. This is the documented deferral from
+ * docs/plans/phase-02-identity-hub.md §"Atomic steps — OGS-120,
+ * OGS-122, OGS-153" → "Loud deferrals". DO NOT close this TODO until
+ * the matching unit test on `/account/sessions` and a manual sign-in
+ * smoke both confirm the 2FA-required path 403s without the second
+ * factor.
  */
 export async function requireAuth(headers: Headers): Promise<AuthSession> {
   const session = await auth.api.getSession({ headers });

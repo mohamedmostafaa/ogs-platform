@@ -23,11 +23,15 @@ model User {
   /// Preferred locale; one of @ogs/config LOCALES.
   locale        String    @default("en")
   /// Hashed password — null when user signs in via OAuth only.
-  passwordHash  String?
+  passwordHash     String?
+  /// True once the user has completed TOTP enrolment via the Better Auth
+  /// twoFactor plugin. Sessions issued before 2FA verification carry
+  /// `session.twoFactorVerified === false` — guards enforce that gate.
+  twoFactorEnabled Boolean   @default(false)
   /// Soft-delete sentinel.
-  deletedAt     DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   accounts                Account[]
   sessions                Session[]
@@ -37,8 +41,38 @@ model User {
   notifications           Notification[]
   notificationPreferences NotificationPreference[]
   preferences             UserPreference?
+  twoFactor               TwoFactor[]
 
   @@index([deletedAt])
+}
+
+/// Per-user TOTP secret + recovery codes for the Better Auth `twoFactor`
+/// plugin. Better Auth manages writes; application code reads via
+/// `auth.api.*` only — never query this table directly.
+///
+/// `secret` is encrypted at rest by Better Auth's standard envelope
+/// (derived from `BETTER_AUTH_SECRET`); `backupCodes` is a
+/// JSON-encoded array of *hashed* one-time recovery codes.
+model TwoFactor {
+  id          String  @id @default(cuid())
+  secret      String
+  backupCodes String
+  /// `false` until the user verifies the first TOTP code, then `true`.
+  ///
+  /// NOTE: Better Auth's declared schema (`two-factor/schema.d.mts`)
+  /// uses `defaultValue: true`. We diverge intentionally and default
+  /// to `false` — fail-closed. BA always writes this column on insert
+  /// via its adapter, so the column-default value is only exercised on
+  /// a hypothetical direct-DB insert path. Defaulting to `false` there
+  /// means a malformed row blocks the user from completing 2FA rather
+  /// than auto-promoting them as verified. Reviewed in Chunk-A of
+  /// Phase 02; deliberate.
+  verified    Boolean @default(false)
+  userId      String
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("twoFactor")
 }
 
 model Account {

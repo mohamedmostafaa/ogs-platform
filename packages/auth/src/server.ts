@@ -19,10 +19,10 @@ import { oauthProvider } from "@better-auth/oauth-provider";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
-import { jwt } from "better-auth/plugins";
+import { emailOTP, jwt, twoFactor } from "better-auth/plugins";
 
 import { prisma } from "@ogs/db";
-import { sendPasswordResetEmail, sendVerifyEmail } from "@ogs/email";
+import { sendOTPEmail, sendPasswordResetEmail, sendVerifyEmail } from "@ogs/email";
 
 import { getAuthBaseUrl, getAuthSecret } from "./env";
 import { provisionUser } from "./provisioning";
@@ -133,6 +133,37 @@ export const auth = betterAuth({
      * derived from BETTER_AUTH_SECRET).
      */
     jwt(),
+    /**
+     * Email OTP — used for passwordless sign-in, email verification,
+     * forgot-password (in addition to the link-based flow), and
+     * change-email confirmation. All four BA flows route through the
+     * single `@ogs/email/sendOTPEmail` helper.
+     *
+     * - 6 digits / 10-minute expiry / 3 attempts before the OTP is
+     *   invalidated (Gate 9, application-layer cap). The Arcjet edge
+     *   rule in OGS-162 stacks on top.
+     */
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 600,
+      allowedAttempts: 3,
+      sendVerificationOTP: async ({ email, otp }) => {
+        await sendOTPEmail({
+          to: email,
+          code: otp,
+          appName: "OGS Identity",
+        });
+      },
+    }),
+    /**
+     * Two-factor auth (TOTP + backup codes). Sessions issued before
+     * 2FA verification carry `session.twoFactorVerified === false` —
+     * guard-tightening lands with the `/2fa` UI commit (loud-deferred
+     * in docs/plans/phase-02-identity-hub.md).
+     */
+    twoFactor({
+      issuer: "OGS Identity",
+    }),
     /**
      * OIDC provider — id.ogs-tc.com issues tokens that the 7 sibling
      * apps consume. Per-tenant clients are seeded via `OAuthApplication`

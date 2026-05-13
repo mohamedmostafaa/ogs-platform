@@ -10,9 +10,17 @@
  * other apps are pure OIDC clients consuming sessions issued by
  * Identity.
  *
- * @see Blueprint §6.4.
+ * Client plugins mirror the server-side plugin set:
+ *   - `emailOTPClient`       — `signIn.emailOtp`, `sendVerificationOtp`.
+ *   - `twoFactorClient`      — `twoFactor.enable`, `twoFactor.verify`,
+ *                              `twoFactor.getBackupCodes`.
+ *   - `genericOAuthClient`   — `signIn.oauth2` for the OIDC clients in
+ *                              the 7 sibling apps (Careers, Academy, …).
+ *
+ * @see Blueprint §6.4, §6.5.
  */
 import { createAuthClient as createBetterAuthClient } from "better-auth/react";
+import { emailOTPClient, genericOAuthClient, twoFactorClient } from "better-auth/client/plugins";
 
 export interface OgsAuthClientOptions {
   /**
@@ -38,6 +46,7 @@ export function createOgsAuthClient(opts: OgsAuthClientOptions = {}) {
       process.env.BETTER_AUTH_URL ??
       // Local-dev default.
       "http://localhost:3000",
+    plugins: [emailOTPClient(), twoFactorClient(), genericOAuthClient()],
   });
 }
 
