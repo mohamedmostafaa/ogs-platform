@@ -46,13 +46,16 @@ export const FaqAccordion = React.forwardRef<
   const firstId = items[0]?.id;
   const initialOpen = defaultOpenId ?? firstId;
 
+  // `exactOptionalPropertyTypes: true` rejects passing `string | undefined`
+  // into Radix's `defaultValue?: string` / `aria-label?: string`. Spread
+  // only when the value is concrete — canonical workspace pattern.
   return (
     <AccordionPrimitive.Root
       ref={ref}
       type="single"
       collapsible
-      defaultValue={initialOpen}
-      aria-label={ariaLabel}
+      {...(initialOpen !== undefined ? { defaultValue: initialOpen } : {})}
+      {...(ariaLabel !== undefined ? { "aria-label": ariaLabel } : {})}
       className="mx-auto flex w-full max-w-[880px] flex-col"
     >
       {items.map((item) => (
