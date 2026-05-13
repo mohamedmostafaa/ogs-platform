@@ -17,6 +17,7 @@
  */
 
 @import "tailwindcss";
+@import "./careers.css";
 
 @custom-variant dark (&:is(.dark *));
 

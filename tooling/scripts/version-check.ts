@@ -48,6 +48,9 @@ const LOCKED: readonly Locked[] = [
   { name: "class-variance-authority", floor: "0.7.1", owner: "@ui-engineer" },
   { name: "clsx", floor: "2.1.1", owner: "@ui-engineer" },
   { name: "tailwind-merge", floor: "3.6.0", owner: "@ui-engineer" },
+  // Carousels — see ADR-0008 for justification + alternatives considered.
+  { name: "embla-carousel-react", floor: "8.6.0", owner: "@ui-engineer" },
+  { name: "embla-carousel-autoplay", floor: "8.6.0", owner: "@ui-engineer" },
   // Forms
   { name: "react-hook-form", floor: "7.75.0", owner: "@frontend-feature-engineer" },
   { name: "@hookform/resolvers", floor: "5.2.2", owner: "@frontend-feature-engineer" },

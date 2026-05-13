@@ -250,7 +250,7 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 - [x] `OGS-122` `packages/auth/src/client-config.ts` extended with `genericOAuthClient` + `emailOTPClient` + `twoFactorClient` — @auth-engineer — §6.5
 - [x] `OGS-123` `/login` (modules/auth + tRPC + RHF/zod, ratelimited via Arcjet) — @auth-engineer — §6.1
 - [x] `OGS-124` `/signup` (modules/auth + tRPC + RHF/zod) — @auth-engineer — §6.1
-- [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5 (DEFERRED — twoFactor plugin landed; UI pending)
+- [x] `OGS-125` `/2fa` enrol + verify pages + `requireAuth` 2FA gate (modules/two-factor + tRPC + RHF/zod + InputOTP) — @auth-engineer + @frontend-feature-engineer — §6.5, §6.8
 - [x] `OGS-125a` `InputOTP` primitive added to `@ogs/ui` (consumer of OGS-125) — @ui-engineer — §9
 - [x] `OGS-126` `/account/sessions` (Suspense + tRPC, masked IP) — @auth-engineer — §6.11
 - [x] `OGS-127` `/forbidden` page used by guards — @auth-engineer — §6.8
@@ -331,6 +331,8 @@ A hardcoded LiveSession id opens a Stream room with lobby → active → ended. 
 > Plan file: [`docs/plans/phase-04-careers-vertical.md`](docs/plans/phase-04-careers-vertical.md). Macro IDs `OGS-200 … OGS-282` (grandfathered range). Expanded JIT.
 
 **Owners.** @frontend-feature-engineer (lead), @api-engineer, @ai-engineer, @inngest-engineer, @payments-engineer, @notifications-engineer, @ui-engineer, @qa-engineer.
+
+- [ ] `OGS-200a` 12 generic marketing primitives in `@ogs/ui` (ahead of careers landing) — @ui-engineer — careers-landing.md §4
 
 Notable Arcjet entries:
 

@@ -1,0 +1,33 @@
+/**
+ * `@ogs/ui` — `data-surface="careers"` token override partial.
+ *
+ * Scopes the careers product-marketing palette under
+ * `[data-surface="careers"]`, layered over the resolved shadcn neutral
+ * tokens in `globals.css`. Imported from `globals.css` so the partial
+ * resolves with the rest of the design-system tokens.
+ *
+ * @see docs/design/careers-landing.md §2.1
+ */
+
+[data-surface="careers"] {
+  /* Surfaces */
+  --background: 0 0% 100%;
+  --foreground: 215 30% 18%;
+
+  /* Brand */
+  --primary: 215 60% 14%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 25% 96%;
+  --secondary-foreground: 215 30% 18%;
+
+  /* Semantic */
+  --muted: 215 20% 92%;
+  --muted-foreground: 215 16% 35%;
+
+  /* Accent — teal/cyan CTA + focus ring */
+  --accent: 186 78% 42%;
+  --accent-foreground: 0 0% 100%;
+
+  --border: 215 16% 88%;
+  --ring: 186 78% 42%;
+}

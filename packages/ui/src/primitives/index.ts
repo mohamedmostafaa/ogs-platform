@@ -40,6 +40,14 @@ export { Button, buttonVariants, type ButtonProps } from "./button";
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
 // Checkbox
 export { Checkbox } from "./checkbox";
+// CountryFlagStrip — careers landing (ahead of OGS-200a)
+export {
+  CountryFlagStrip,
+  type CountryFlagStripProps,
+  type SupportedCountryCode,
+} from "./country-flag-strip";
+// CtaBanner — careers landing (ahead of OGS-200a)
+export { CtaBanner, type CtaBannerProps, type CtaBannerSurface } from "./cta-banner";
 // Dialog
 export {
   Dialog,
@@ -53,6 +61,10 @@ export {
   DialogTitle,
   DialogTrigger,
 } from "./dialog";
+// FaqAccordion — careers landing (ahead of OGS-200a)
+export { FaqAccordion, type FaqAccordionItem, type FaqAccordionProps } from "./faq-accordion";
+// FeatureCard — careers landing (ahead of OGS-200a)
+export { FeatureCard, type FeatureCardAccent, type FeatureCardProps } from "./feature-card";
 // DropdownMenu
 export {
   DropdownMenu,
@@ -66,6 +78,37 @@ export {
   DropdownMenuSub,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
+// HeroCarousel — careers landing (ahead of OGS-200a)
+export { HeroCarousel, type HeroCarouselProps, type HeroCarouselSlide } from "./hero-carousel";
+// LogoMarquee — careers landing (ahead of OGS-200a)
+export { LogoMarquee, type LogoMarqueeItem, type LogoMarqueeProps } from "./logo-marquee";
+// MarketingFooter — careers landing (ahead of OGS-200a)
+export {
+  MarketingFooter,
+  type MarketingFooterColumn,
+  type MarketingFooterLegal,
+  type MarketingFooterLink,
+  type MarketingFooterProps,
+} from "./marketing-footer";
+// MarketingHeader — careers landing (ahead of OGS-200a)
+export {
+  MarketingHeader,
+  type MarketingHeaderNavItem,
+  type MarketingHeaderProps,
+} from "./marketing-header";
+// MarketingHero — careers landing (ahead of OGS-200a)
+export { MarketingHero, type MarketingHeroProps } from "./marketing-hero";
+// QuoteBlock — careers landing (ahead of OGS-200a)
+export { QuoteBlock, type QuoteBlockProps } from "./quote-block";
+// SectionShell — careers landing (ahead of OGS-200a)
+export { SectionShell, type SectionShellProps, type SectionShellSurface } from "./section-shell";
+// TimelineSteps — careers landing (ahead of OGS-200a)
+export {
+  TimelineSteps,
+  type TimelineStepItem,
+  type TimelineStepsAccent,
+  type TimelineStepsProps,
+} from "./timeline-steps";
 // Form (RHF + Zod adapters)
 export {
   Form,
