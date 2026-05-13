@@ -248,11 +248,12 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 - [x] `OGS-120` `packages/auth/src/server.ts` with `oauthProvider` + `jwt` + `emailOTP` + `twoFactor` (per blueprint §6.2) — @auth-engineer — §6.2
 - [ ] `OGS-121` Catch-all auth route `apps/web-id/src/app/api/auth/[...all]/route.ts` — @auth-engineer — §6.3
 - [x] `OGS-122` `packages/auth/src/client-config.ts` extended with `genericOAuthClient` + `emailOTPClient` + `twoFactorClient` — @auth-engineer — §6.5
-- [x] `OGS-123` `/login` page in web-id (email+password) — @auth-engineer — §6.1
-- [x] `OGS-124` `/signup` page in web-id (email+password) — @auth-engineer — §6.1
-- [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5 (DEFERRED — twoFactor plugin lands in Chunk A)
-- [x] `OGS-126` `/account/sessions` (active sessions + revoke any) — @auth-engineer — §6.11
+- [x] `OGS-123` `/login` (modules/auth + tRPC + RHF/zod, ratelimited via Arcjet) — @auth-engineer — §6.1
+- [x] `OGS-124` `/signup` (modules/auth + tRPC + RHF/zod) — @auth-engineer — §6.1
+- [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5 (DEFERRED — twoFactor plugin landed; UI pending)
+- [x] `OGS-126` `/account/sessions` (Suspense + tRPC, masked IP) — @auth-engineer — §6.11
 - [x] `OGS-127` `/forbidden` page used by guards — @auth-engineer — §6.8
+- [ ] `OGS-128` Unit tests for `safeCallbackURL` + `maskIp` (open-redirect + PII boundary) — @qa-engineer — follow-up
 
 ### Worker provisioning on signup
 

@@ -3,6 +3,7 @@ import "@ogs/ui/styles/globals.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { Toaster } from "@ogs/ui/primitives";
 import { OgsThemeProvider } from "@ogs/ui/theme";
 
 import { TRPCReactProvider } from "~/lib/trpc";
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       <body className="bg-background text-foreground min-h-screen antialiased">
         <OgsThemeProvider>
           <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster richColors closeButton />
         </OgsThemeProvider>
       </body>
     </html>
