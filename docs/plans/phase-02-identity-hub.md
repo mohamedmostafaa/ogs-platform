@@ -373,6 +373,120 @@ feat(auth): emailOTP + twoFactor plugins + auth-client extension (OGS-120, OGS-1
 
 (walk 10 SECURITY gates inline; document /2fa-UI deferral.)
 
+---
+
+## Atomic steps — OGS-125 + guards-tightening (`/2fa` enrol + verify pages + `requireAuth` 2FA gate)
+
+**Owner:** @auth-engineer (lead — module + guards + procedures) + @ui-engineer (new `InputOTP` primitive) + @frontend-feature-engineer (views/components composition)
+**Reviewer:** @security-engineer + @code-reviewer (per `.claude/agents/auth-engineer.md` "Required reviewers"). UI-only PR (InputOTP) reviewed by @code-reviewer alone per `.claude/agents/ui-engineer.md`.
+**Security gates touched:** Gate 1 (the deferred `twoFactorVerified` gate closes here), Gate 2 (Zod from `modules/two-factor/schema.ts`), Gate 3 (uniform verify-failure), Gate 8 (TOTP secret + backup codes never logged), Gate 9 (`twoFactor.*` rides the same Arcjet bucket as `auth.*`), Gate 10 (backup-codes one-shot display + download + ack-checkbox).
+
+**Blueprint sections:** §6.2 (Better Auth instance), §6.5 (browser client), §6.8 (guards).
+
+### Prerequisites verified
+
+- `twoFactor` plugin already wired server-side in `packages/auth/src/server.ts` (commit 94f1375).
+- `twoFactorClient` already wired in `packages/auth/src/client-config.ts`.
+- Better Auth endpoints needed (verified via `node_modules/.../two-factor/index.d.mts`): `enableTwoFactor`, `verifyTOTP`, `verifyBackupCode`, `disableTwoFactor`, `generateBackupCodes`, `sendTwoFactorOTP`.
+- `requireAuth` TODO marker at `packages/auth/src/guards.ts:39` (commit 94f1375) is the deferred gate this chunk closes.
+
+### Scope decision (loud, in the plan)
+
+- **In scope:** TOTP enrolment wizard at `/account/2fa`, TOTP/backup-code verification at `/2fa`, `requireAuth` tightening, `proxy.ts` Arcjet extension for `twoFactor.*` paths, new `InputOTP` primitive in `@ogs/ui`.
+- **DEFERRED:** (1) Disabling 2FA on password change (step-up); (2) Recovery flow when user loses both authenticator + backup codes — needs `auth.adminDisable2fa` which depends on admin-proxy role gate (OGS-160, a later chunk); (3) `sendTwoFactorOTP` email-based 2FA path — only TOTP + backup codes ship here.
+
+### File map
+
+| Path                                                                       | Owner                     | Purpose                                                                                                                                                   |
+| -------------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui/src/primitives/input-otp.tsx`                                 | ui-engineer               | New shadcn `InputOTP` primitive. Re-exports `InputOTPGroup`, `InputOTPSlot`, `InputOTPSeparator`.                                                         |
+| `packages/ui/src/primitives/index.ts`                                      | ui-engineer               | Export new primitive.                                                                                                                                     |
+| `packages/ui/package.json`                                                 | ui-engineer               | Add `input-otp` runtime dep.                                                                                                                              |
+| `packages/auth/src/guards.ts`                                              | auth-engineer             | Tighten `requireAuth`: throw `AuthGuardError("FORBIDDEN", ..., redirect: "/2fa")` when `twoFactorEnabled && !twoFactorVerified`. Remove the OGS-125 TODO. |
+| `apps/id/src/proxy.ts`                                                     | auth-engineer             | Extend `isAuthTrpcPath` matcher to include `twoFactor.*` procedures.                                                                                      |
+| `apps/id/src/modules/two-factor/schema.ts`                                 | auth-engineer             | Zod: `EnrolStartSchema`, `EnrolConfirmSchema`, `VerifyTotpSchema`, `VerifyBackupSchema`, `DisableSchema`. Uniform-message constants.                      |
+| `apps/id/src/modules/two-factor/types.ts`                                  | auth-engineer             | `EnrolResult { totpURI; backupCodes: string[] }`, `EnrolStep` union, `Use2faOptions`.                                                                     |
+| `apps/id/src/modules/two-factor/params.ts`                                 | auth-engineer             | Placeholder.                                                                                                                                              |
+| `apps/id/src/modules/two-factor/server/procedures.ts`                      | auth-engineer             | `twoFactorRouter`: `enrolStart`, `enrolConfirm`, `verifyTotp`, `verifyBackup`, `disable`, `regenerateBackupCodes`.                                        |
+| `apps/id/src/modules/two-factor/hooks/use-enrol-start.ts`                  | frontend-feature-engineer | TanStack-Query mutation + toast.                                                                                                                          |
+| `apps/id/src/modules/two-factor/hooks/use-enrol-confirm.ts`                | frontend-feature-engineer |                                                                                                                                                           |
+| `apps/id/src/modules/two-factor/hooks/use-verify-totp.ts`                  | frontend-feature-engineer | On success: `router.push(safeCallbackURL(callbackURL))`.                                                                                                  |
+| `apps/id/src/modules/two-factor/hooks/use-verify-backup.ts`                | frontend-feature-engineer |                                                                                                                                                           |
+| `apps/id/src/modules/two-factor/hooks/use-disable.ts`                      | frontend-feature-engineer | Invalidates `auth.sessions.list` cache (revokes session).                                                                                                 |
+| `apps/id/src/modules/two-factor/hooks/use-regenerate-backup-codes.ts`      | frontend-feature-engineer |                                                                                                                                                           |
+| `apps/id/src/modules/two-factor/lib/qr.ts`                                 | frontend-feature-engineer | `renderQrDataUrl(totpURI)` via `qrcode` npm lib.                                                                                                          |
+| `apps/id/src/modules/two-factor/ui/views/enrol-view.tsx`                   | frontend-feature-engineer | 3-step wizard: password → QR+code → backup codes.                                                                                                         |
+| `apps/id/src/modules/two-factor/ui/views/verify-view.tsx`                  | frontend-feature-engineer | TOTP entry + "use backup code" toggle.                                                                                                                    |
+| `apps/id/src/modules/two-factor/ui/components/enrol-password-step.tsx`     | frontend-feature-engineer | RHF + zodResolver(EnrolStartSchema).                                                                                                                      |
+| `apps/id/src/modules/two-factor/ui/components/enrol-totp-step.tsx`         | frontend-feature-engineer | QR + InputOTP + RHF(EnrolConfirmSchema).                                                                                                                  |
+| `apps/id/src/modules/two-factor/ui/components/enrol-backup-codes-step.tsx` | frontend-feature-engineer | Copy + download + ack-checkbox.                                                                                                                           |
+| `apps/id/src/modules/two-factor/ui/components/verify-totp-form.tsx`        | frontend-feature-engineer | InputOTP + trustDevice checkbox.                                                                                                                          |
+| `apps/id/src/modules/two-factor/ui/components/verify-backup-form.tsx`      | frontend-feature-engineer | Single-input + uniform-failure.                                                                                                                           |
+| `apps/id/src/app/(auth)/2fa/page.tsx`                                      | frontend-feature-engineer | ≤ 10 lines — composes `<VerifyView callbackURL=... />`.                                                                                                   |
+| `apps/id/src/app/account/2fa/page.tsx`                                     | frontend-feature-engineer | ≤ 10 lines — composes `<EnrolView />`, `requireAuth`-gated.                                                                                               |
+| `apps/id/src/lib/app-router.ts`                                            | auth-engineer             | `twoFactor: twoFactorRouter`.                                                                                                                             |
+| `apps/id/package.json`                                                     | frontend-feature-engineer | `qrcode` runtime dep + `@types/qrcode` dev dep.                                                                                                           |
+
+### Step-by-step
+
+**Step 1 — UI engineer (separate commit + Code-Reviewer approval):**
+
+- Add `packages/ui/src/primitives/input-otp.tsx` from shadcn's `input-otp` recipe. Wrap to use OGS theme tokens.
+- Export from `packages/ui/src/primitives/index.ts`.
+- Add `input-otp` dep to `packages/ui/package.json`. Pin at the version `pnpm view input-otp version` reports.
+- Run `pnpm install` + `pnpm turbo typecheck lint --filter=@ogs/ui`.
+- Dispatch `superpowers:code-reviewer` (UI charter requires Code Reviewer only).
+- Commit + push only after SHIP.
+
+**Step 2 — auth-engineer (separate commit, AFTER step 1 is in main):**
+
+- Build `apps/id/src/modules/two-factor/{schema,types,params}.ts` + `server/procedures.ts`.
+- Tighten `packages/auth/src/guards.ts:requireAuth` for the `twoFactorVerified` gate. Remove the TODO. Add tests-rationale JSDoc.
+- Extend `apps/id/src/proxy.ts:isAuthTrpcPath` to also match `twoFactor.*` procedures.
+- Wire `twoFactor: twoFactorRouter` into `apps/id/src/lib/app-router.ts`.
+
+**Step 3 — frontend-feature-engineer (same commit as step 2):**
+
+- Build the hooks + views + components per the file map. RHF + `@hookform/resolvers/zod`. Toast via `@ogs/ui/primitives.toast`.
+- Multi-step wizard pattern: a single `EnrolView` owns the step state; each step is its own RHF form.
+- Backup-codes step: render as `<pre>` block + clipboard-copy button + download-as-txt button + a checkbox "I've saved these codes" that gates the "Done" button.
+- Compose the two `app/` pages as ≤ 10-line composition-only files.
+- Add `qrcode` + `@types/qrcode` to `apps/id/package.json`.
+
+**Step 4 — security-engineer review (mandatory, pre-push):**
+
+- Walk gates 1, 2, 3, 8, 9, 10 against this chunk.
+- Confirm Arcjet bucket extension covers all `twoFactor.*` paths (single + batched URLs).
+- Confirm backup codes never persist outside BA's hashed storage; never log; UI shows them exactly once.
+- Confirm guards tightening doesn't loop (e.g. `/2fa` must NOT trigger requireAuth's 2FA gate, otherwise users can't ever verify).
+
+**Step 5 — code-reviewer (merge gate):**
+
+- Run the 10-item charter checklist.
+- Verify TASKS.md updated.
+
+### Verification gates (must all PASS before commit)
+
+- [ ] `pnpm version-check` 66+ green / 0 yellow.
+- [ ] `pnpm turbo typecheck build lint` → all green.
+- [ ] `pnpm format:check` → clean.
+- [ ] `gitleaks` → 0 leaks.
+- [ ] Manual smoke documented in commit body: enrol → verify → revoke session → re-sign-in → 2FA verify works.
+
+### Loud deferrals
+
+- 2FA-on-password-change step-up. Future task.
+- Admin override / recovery flow (depends on OGS-160 admin proxy).
+- `sendTwoFactorOTP` email-2FA path (TOTP + backup codes only here).
+
+### Commit body template
+
+```
+feat(id): 2FA enrolment + verify pages + requireAuth 2FA gate (OGS-125)
+```
+
+(walk 10 SECURITY gates inline; cite agent dispatches.)
+
 ## Done
 
 (Move completed tasks here.)
