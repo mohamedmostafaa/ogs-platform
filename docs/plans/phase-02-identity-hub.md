@@ -245,6 +245,134 @@ feat(id): /login + /signup + /forgot-password + /reset-password + /account/sessi
 
 (walk 10 SECURITY gates inline, document /2fa + OTP deferrals.)
 
+---
+
+## Atomic steps — OGS-120, OGS-122, OGS-153 (emailOTP + twoFactor plugins + auth-client extension)
+
+**Owner:** @auth-engineer (lead), @database-engineer (TwoFactor table migration)
+**Reviewer:** @code-reviewer + @security-engineer (Gate 1 enforcement still holds with new flows, Gate 8 — OTP secret + TOTP secret never logged, Gate 9 — emailOTP allowedAttempts caps brute-force at the application layer too)
+**Security gates touched:**
+
+- Gate 1 (authz): twoFactor introduces a post-password gate. Sessions issued before 2FA verification carry `session.twoFactorVerified === false` and our guards must treat them as unauthenticated for `/account/*` routes (DEFERRED to the 2FA-UI commit — flagged loud).
+- Gate 8 (secrets): TOTP secret stored encrypted in the new `TwoFactor.secret` column; Better Auth applies its standard `secret` encryption when `storeOTP` defaults remain. Backup codes stored as a JSON array of hashed strings.
+- Gate 9 (rate limiting): emailOTP `allowedAttempts: 3` caps app-layer brute-force; the Arcjet `authEndpoint` rule (OGS-162, Chunk D) caps edge-layer brute-force. Both layers in defence-in-depth.
+
+**Blueprint sections:** §6.2 (Better Auth instance), §6.5 (browser client), §18.4 (emailOTP send hook).
+
+### Prerequisites verified
+
+- `packages/auth/src/server.ts` already wires `oauthProvider` + `jwt` plugins; this chunk adds two more.
+- `@ogs/email` exports `sendOTPEmail` (Phase 02 §OGS-152) — ready to pass to `emailOTP.sendVerificationOTP`.
+- Better Auth's emailOTP plugin requires no extra DB table (re-uses the existing `Verification` model).
+- Better Auth's twoFactor plugin requires a new `TwoFactor` model + `User.twoFactorEnabled` Boolean (confirmed via `node_modules/.../two-factor/schema.d.mts`).
+
+### Scope decision (loud, in the plan)
+
+- **In scope:** wire both plugins server-side, extend `createOgsAuthClient` with `emailOTPClient`, `twoFactorClient`, and `genericOAuthClient`, add the `TwoFactor` model + `twoFactorEnabled` user field + Prisma migration, dispatch the OTP email via the new plugin (OGS-153 closes now).
+- **DEFERRED to a follow-up commit:**
+  - `/2fa` UI page (OGS-125) — the plugins are wired; the page can land next.
+  - "Sign-in-with-OTP" UI on `/login` — current `/login` only does email+password. A new tabbed UI is a UX-level decision and ships separately.
+  - Updating `requireAuth` / `requireRole` to reject sessions where `twoFactorVerified === false` — this is a security-policy change with downstream effects on every protected route; ships with the 2FA UI in the same commit so it's testable end-to-end.
+
+### File map
+
+| Path                                              | Purpose                                                                                                     |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `packages/db/prisma/schema/auth.prisma`           | Add `twoFactorEnabled` to `User`; add `TwoFactor` model.                                                    |
+| `packages/db/prisma/migrations/.../migration.sql` | Generated via `pnpm --filter @ogs/db prisma:migrate dev --name add_two_factor`.                             |
+| `packages/auth/src/server.ts`                     | Import + register `emailOTP({ sendVerificationOTP, allowedAttempts: 3 })` and `twoFactor({ issuer })`.      |
+| `packages/auth/src/client-config.ts`              | Import + register `emailOTPClient()`, `twoFactorClient()`, `genericOAuthClient()` in `createOgsAuthClient`. |
+
+### OGS-153.02 — wire `sendOTPEmail` into `emailOTP.sendVerificationOTP`
+
+- [ ] On `packages/auth/src/server.ts`, import `emailOTP` from `better-auth/plugins` and `sendOTPEmail` from `@ogs/email`.
+- [ ] Add to `plugins: [...]`:
+  ```ts
+  emailOTP({
+    otpLength: 6,
+    expiresIn: 600, // 10 minutes
+    allowedAttempts: 3,
+    sendVerificationOTP: async ({ email, otp, type }) => {
+      // We map all four BA flows (sign-in / email-verification /
+      // forget-password / change-email) to the same template; the
+      // subject is set per-type so the inbox makes sense.
+      await sendOTPEmail({
+        to: email,
+        code: otp,
+        appName: "OGS Identity",
+      });
+    },
+  }),
+  ```
+- [ ] **Type-level guard:** assert the callback param shape is inferred (no hand-typing) so a future BA upgrade that renames `otp` to e.g. `code` would break the build instead of silently no-op-ing.
+
+### OGS-120.01 — wire the `twoFactor` plugin
+
+- [ ] On `packages/auth/src/server.ts`, import `twoFactor` from `better-auth/plugins`.
+- [ ] Add to `plugins: [...]`:
+  ```ts
+  twoFactor({
+    issuer: "OGS Identity",
+  }),
+  ```
+- [ ] No `skipVerificationOnEnable` (default `false`) — users must complete TOTP setup before 2FA is active on their account.
+
+### OGS-040-equivalent migration — add `TwoFactor` model
+
+- [ ] In `packages/db/prisma/schema/auth.prisma`:
+
+  ```prisma
+  model User {
+    // ...existing fields...
+    twoFactorEnabled Boolean @default(false)
+    twoFactor TwoFactor[]
+  }
+
+  model TwoFactor {
+    id          String  @id @default(cuid())
+    secret      String
+    backupCodes String
+    verified    Boolean @default(false)
+    userId      String
+    user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
+    @@map("twoFactor")
+  }
+  ```
+
+- [ ] Run `pnpm --filter @ogs/db prisma:migrate dev --name add_two_factor`. Commit the generated `migration.sql`.
+
+### OGS-122.01 — extend `createOgsAuthClient` with all three plugins
+
+- [ ] On `packages/auth/src/client-config.ts`, import:
+  ```ts
+  import { emailOTPClient, twoFactorClient, genericOAuthClient } from "better-auth/client/plugins";
+  ```
+- [ ] Add to the `createBetterAuthClient({ ... })` call:
+  ```ts
+  plugins: [emailOTPClient(), twoFactorClient(), genericOAuthClient()],
+  ```
+- [ ] Update the JSDoc to call out the three new client plugins.
+
+### Verification gates (must all PASS before commit)
+
+- [ ] `pnpm version-check` → 66+ green, 0 yellow.
+- [ ] `pnpm --filter @ogs/db prisma:validate` passes after schema change.
+- [ ] Migration file exists under `packages/db/prisma/migrations/` and is committed.
+- [ ] `pnpm turbo typecheck build lint` → all green (38/38).
+- [ ] `pnpm format:check` → clean.
+- [ ] `gitleaks detect --exit-code 1` → 0 leaks.
+- [ ] **Dispatch the `superpowers:code-reviewer` subagent BEFORE push.** Apply BLOCKERS inline; loud-defer SHOULDs not landing in this commit.
+
+### Commit body template
+
+```
+feat(auth): emailOTP + twoFactor plugins + auth-client extension (OGS-120, OGS-122, OGS-153)
+```
+
+(walk 10 SECURITY gates inline; document /2fa-UI deferral.)
+
 ## Done
 
 (Move completed tasks here.)
