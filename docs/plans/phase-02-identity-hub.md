@@ -151,6 +151,100 @@ feat(email): @ogs/email — Nodemailer 8 + React Email templates + Better Auth v
 
 (walk 10 SECURITY gates inline, document any deferrals.)
 
+---
+
+## Atomic steps — OGS-123, OGS-124, OGS-126, OGS-127 (auth pages — email+password only)
+
+**Owner:** @auth-engineer (lead), @ui-engineer (form components)
+**Reviewer:** @code-reviewer + @security-engineer (Gate 1 authz, Gate 2 input validation, Gate 3 output minimisation — never leak existence-of-account, Gate 7 CSRF — Next.js server actions provide built-in tokenisation)
+**Security gates touched:**
+
+- Gate 1 (authz): `/account/sessions` is `requireAuth`-gated; unauthenticated request 302s to `/login`.
+- Gate 2 (input validation): every server action's payload is Zod-validated; rejected inputs surface a generic error, never echo back the offending bytes.
+- Gate 3 (output minimisation): sign-in failures and forgot-password responses are uniform — same wording whether the email exists or not (Gate 1 dovetail: prevent account enumeration via response timing/wording).
+- Gate 7 (CSRF): Next.js Server Actions ship with built-in token rotation; we don't roll our own.
+
+**Blueprint sections:** §6.1 (sign-in/sign-up flow), §6.8 (guards + forbidden page), §6.11 (active-session management).
+
+### Prerequisites verified
+
+- `auth.api.signInEmail`, `auth.api.signUpEmail`, `auth.api.forgetPassword`, `auth.api.resetPassword`, `auth.api.listSessions`, `auth.api.revokeSession` all available on the `auth` instance exported from `@ogs/auth/server` (Better Auth 1.6 built-ins + the `emailAndPassword` block we already wired).
+- `nextCookies()` plugin already mounted on the server instance → Set-Cookie flows through Server Actions automatically.
+- `@ogs/ui` exports `Button`, `Input`, `Label`, `Card*`, `Alert*` — confirmed via barrel inspection before this expansion.
+
+### Scope decision (loud, in the plan)
+
+- **In scope:** `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/account/sessions`, `/forbidden`.
+- **DEFERRED:** `/2fa` (OGS-125) — the `twoFactor` plugin is not wired yet (Chunk A — OGS-120/122). Building the page now would mean stubbing a plugin call and we'd come back to rewrite it. The page lands in the same commit that wires `twoFactor`.
+- **DEFERRED:** OTP-based passwordless sign-in (the `<input type="otp" />` UI) — same reason; `emailOTP` plugin lands with Chunk A.
+
+### File map
+
+| Path                                                     | Purpose                                                                                        |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `apps/id/src/app/(auth)/layout.tsx`                      | Shared auth-page shell (centred card, logo header, theme toggle).                              |
+| `apps/id/src/app/(auth)/_actions.ts`                     | Server actions: `signInAction`, `signUpAction`, `forgotPasswordAction`, `resetPasswordAction`. |
+| `apps/id/src/app/(auth)/_schemas.ts`                     | Zod schemas + a `formStateError` helper for uniform messaging.                                 |
+| `apps/id/src/app/(auth)/login/page.tsx`                  | `/login` — server component renders the form; client subcomponent owns useFormState.           |
+| `apps/id/src/app/(auth)/login/login-form.tsx`            | Client form. Posts to `signInAction`.                                                          |
+| `apps/id/src/app/(auth)/signup/page.tsx`                 | `/signup` — same pattern.                                                                      |
+| `apps/id/src/app/(auth)/signup/signup-form.tsx`          | Client form. Posts to `signUpAction`.                                                          |
+| `apps/id/src/app/(auth)/forgot-password/page.tsx`        | Server component.                                                                              |
+| `apps/id/src/app/(auth)/forgot-password/forgot-form.tsx` | Client form. Posts to `forgotPasswordAction`.                                                  |
+| `apps/id/src/app/(auth)/reset-password/page.tsx`         | Reads `?token=` from search params, renders the new-password form.                             |
+| `apps/id/src/app/(auth)/reset-password/reset-form.tsx`   | Client form. Posts to `resetPasswordAction`.                                                   |
+| `apps/id/src/app/account/sessions/page.tsx`              | `requireAuth`-gated. Lists active sessions, renders Revoke buttons.                            |
+| `apps/id/src/app/account/sessions/revoke-button.tsx`     | Client component owning the `revokeSessionAction` call + optimistic-remove.                    |
+| `apps/id/src/app/account/sessions/_actions.ts`           | Server action: `revokeSessionAction(sessionId)`.                                               |
+| `apps/id/src/app/forbidden/page.tsx`                     | Static — friendly message + link back to home / sign-in.                                       |
+
+### OGS-127.01 — `/forbidden` (smallest, ships first)
+
+- [ ] Static server component. No data fetch. Renders `<Alert variant="destructive">` + a "Return to sign-in" link to `/login`.
+- [ ] No tracking, no env. Pure presentation.
+
+### OGS-123.01 — `/login` + action
+
+- [ ] `_schemas.ts`: `SignInSchema = z.object({ email: z.string().email(), password: z.string().min(8).max(128) })`. Reject everything else with a single string error: `"Email and password do not match."` (uniform regardless of cause — no enumeration leak).
+- [ ] `_actions.ts`: `signInAction(prev, formData)`. Validates → calls `auth.api.signInEmail({ body, headers, asResponse: true })` → on success, `redirect("/")` (or `?callbackURL=` if present and same-origin). On failure: return `{ error: "Email and password do not match." }`.
+- [ ] `login/page.tsx`: server component rendering `<LoginForm />` (client). Forwards `searchParams.callbackURL` as a hidden input.
+- [ ] `login-form.tsx`: client. `useFormState(signInAction, { error: null })` + native `<form action={action}>`. Disabled submit while `useFormStatus().pending`.
+- [ ] Same-origin callback-URL guard: reject any value that isn't a relative path starting with `/` and not `//`. Default to `/`.
+
+### OGS-124.01 — `/signup` + action
+
+- [ ] `SignUpSchema = z.object({ email, password, confirmPassword, name })` — refine `password === confirmPassword`. Server-side password rule: ≥ 8 chars, ≥ 1 letter + 1 digit (kept identical to Better Auth's default but enforced before we hit the API).
+- [ ] `signUpAction(prev, formData)` → `auth.api.signUpEmail({ body, headers, asResponse: true })`. With `emailVerification.sendOnSignUp: true`, Better Auth dispatches the verify-email automatically. On success: redirect to `/login?status=check-email` (uniform; no per-user data in URL).
+- [ ] On `auth.api.signUpEmail` rejection (duplicate, weak password, rate-limited), return `{ error: "We couldn't create that account. Please double-check the form and try again." }` — uniform message.
+
+### OGS-126.01 — `/account/sessions`
+
+- [ ] Page is server component. `await requireAuth(await headers())` — on `AuthGuardError` redirect to `/login?callbackURL=/account/sessions`.
+- [ ] `const sessions = await auth.api.listSessions({ headers })` — render rows with user-agent / created-at / ip (when present) + a Revoke button per row. **Mask IP to /24 in render** (Gate 3: minimise PII surface — the user already knows their own IP roughly).
+- [ ] `revokeSessionAction(sessionId)`: re-runs `requireAuth`, then `auth.api.revokeSession({ headers, body: { token: sessionId } })`. Refreshes the page via `revalidatePath("/account/sessions")`.
+
+### OGS-126.02 — forgot-password + reset-password pages
+
+- [ ] `/forgot-password`: form posts an email. Server action calls `auth.api.forgetPassword({ body: { email, redirectTo: "/reset-password" }, headers })`. Returns a uniform success message regardless of whether the email exists. No timing-side-channel: do NOT branch on the API response — always return the same shape after a fixed Better Auth call.
+- [ ] `/reset-password?token=…`: server component reads `token` from `searchParams`. If missing/empty, render an error card. Form posts new password + token → action calls `auth.api.resetPassword({ body: { newPassword, token }, headers })`. Success → redirect `/login?status=password-reset`.
+
+### Verification gates (must all PASS before commit)
+
+- [ ] `pnpm turbo typecheck` → all packages green.
+- [ ] `pnpm turbo build` → 8/8 apps green; new `/login`, `/signup`, etc. show in apps/id's route table.
+- [ ] `pnpm turbo lint` → all green.
+- [ ] `pnpm format:check` → clean.
+- [ ] `gitleaks detect --exit-code 1` → 0 leaks.
+- [ ] **Manual smoke (dev):** boot `pnpm --filter=@ogs/id dev`, sign up at `/signup`, receive verify email (real SMTP from previous chunk), click verify link, sign in at `/login`, land on `/`, visit `/account/sessions` and see one row, revoke it → cookie cleared → 302 to `/login`.
+
+### Commit body template
+
+```
+feat(id): /login + /signup + /forgot-password + /reset-password + /account/sessions + /forbidden (OGS-123, 124, 126, 127)
+```
+
+(walk 10 SECURITY gates inline, document /2fa + OTP deferrals.)
+
 ## Done
 
 (Move completed tasks here.)
