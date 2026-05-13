@@ -26,7 +26,8 @@
     "@trpc/server": "^11.17.0",
     "better-auth": "^1.6.11",
     "lucide-react": "^1.14.0",
-    "superjson": "^2.2.6"
+    "superjson": "^2.2.6",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@ogs/eslint-config": "workspace:*",

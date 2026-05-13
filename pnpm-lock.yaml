@@ -410,6 +410,9 @@ importers:
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
     devDependencies:
       '@ogs/eslint-config':
         specifier: workspace:*

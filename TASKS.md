@@ -248,11 +248,11 @@ Phase 00 is **closed** when every item below is true. The original draft of this
 - [ ] `OGS-120` `apps/web-id/src/lib/auth.ts` with `oauthProvider` + `jwt` + `emailOTP` + `twoFactor` (per blueprint §6.2) — @auth-engineer — §6.2
 - [ ] `OGS-121` Catch-all auth route `apps/web-id/src/app/api/auth/[...all]/route.ts` — @auth-engineer — §6.3
 - [ ] `OGS-122` `packages/auth/src/auth-client.ts` (genericOAuthClient + emailOTPClient + twoFactorClient) — @auth-engineer — §6.5
-- [ ] `OGS-123` `/login` page in web-id — @auth-engineer — §6.1
-- [ ] `OGS-124` `/signup` page in web-id — @auth-engineer — §6.1
-- [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5
-- [ ] `OGS-126` `/account/sessions` (active sessions + revoke any) — @auth-engineer — §6.11
-- [ ] `OGS-127` `/forbidden` page used by guards — @auth-engineer — §6.8
+- [x] `OGS-123` `/login` page in web-id (email+password) — @auth-engineer — §6.1
+- [x] `OGS-124` `/signup` page in web-id (email+password) — @auth-engineer — §6.1
+- [ ] `OGS-125` `/2fa` page in web-id — @auth-engineer — §6.5 (DEFERRED — twoFactor plugin lands in Chunk A)
+- [x] `OGS-126` `/account/sessions` (active sessions + revoke any) — @auth-engineer — §6.11
+- [x] `OGS-127` `/forbidden` page used by guards — @auth-engineer — §6.8
 
 ### Worker provisioning on signup
 
