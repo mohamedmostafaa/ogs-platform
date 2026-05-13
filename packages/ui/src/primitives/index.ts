@@ -34,6 +34,8 @@ export {
 export { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 // Badge
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
+// BrowseTile — careers landing (OGS-200b)
+export { BrowseTile, type BrowseTileAccent, type BrowseTileProps } from "./browse-tile";
 // Button
 export { Button, buttonVariants, type ButtonProps } from "./button";
 // Card
@@ -46,6 +48,8 @@ export {
   type CountryFlagStripProps,
   type SupportedCountryCode,
 } from "./country-flag-strip";
+// CountryTile — careers landing (OGS-200b)
+export { CountryTile, type CountryTileCode, type CountryTileProps } from "./country-tile";
 // CtaBanner — careers landing (ahead of OGS-200a)
 export { CtaBanner, type CtaBannerProps, type CtaBannerSurface } from "./cta-banner";
 // Dialog
@@ -80,6 +84,15 @@ export {
 } from "./dropdown-menu";
 // HeroCarousel — careers landing (ahead of OGS-200a)
 export { HeroCarousel, type HeroCarouselProps, type HeroCarouselSlide } from "./hero-carousel";
+// JobCard — careers landing (OGS-200b)
+export {
+  JobCard,
+  type JobCardCountryCode,
+  type JobCardProps,
+  type JobCardRoleFamily,
+} from "./job-card";
+// JobSearchBar — careers landing (OGS-200b)
+export { JobSearchBar, type JobSearchBarProps, type JobSearchCountryCode } from "./job-search-bar";
 // LogoMarquee — careers landing (ahead of OGS-200a)
 export { LogoMarquee, type LogoMarqueeItem, type LogoMarqueeProps } from "./logo-marquee";
 // MarketingFooter — careers landing (ahead of OGS-200a)

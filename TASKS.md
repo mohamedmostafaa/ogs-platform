@@ -333,6 +333,7 @@ A hardcoded LiveSession id opens a Stream room with lobby → active → ended. 
 **Owners.** @frontend-feature-engineer (lead), @api-engineer, @ai-engineer, @inngest-engineer, @payments-engineer, @notifications-engineer, @ui-engineer, @qa-engineer.
 
 - [ ] `OGS-200a` 12 generic marketing primitives in `@ogs/ui` (ahead of careers landing) — @ui-engineer — careers-landing.md §4
+- [ ] OGS-200b — 4 job-portal primitives in @ogs/ui + careers smoke route — @ui-engineer — careers-landing.md §4 rows 13-16
 
 Notable Arcjet entries:
 
